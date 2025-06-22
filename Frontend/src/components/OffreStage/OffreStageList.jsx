@@ -68,9 +68,12 @@ function OffreStageList({ onCreateNew, onEdit, onView }) {
     try {
       setLoading(true);
       const data = await offreStageService.getAllOffres();
+      console.log('📥 Données des offres reçues:', data);
+      console.log('📊 Statuts des offres:', data.map(o => ({ id: o.id, titre: o.titre, estPublie: o.estPublie })));
       setOffres(data);
       setError('');
     } catch (err) {
+      console.error('❌ Erreur chargement offres:', err);
       setError('Erreur lors du chargement des offres: ' + (err.response?.data?.error || err.message));
     } finally {
       setLoading(false);
@@ -89,13 +92,32 @@ function OffreStageList({ onCreateNew, onEdit, onView }) {
 
   const handlePublish = async (offre) => {
     try {
+      console.log('🔄 Publication/Dépublication de l\'offre:', offre.id, 'État actuel:', offre.estPublie);
+
+      let result;
       if (offre.estPublie) {
-        await offreStageService.depublierOffre(offre.id);
+        result = await offreStageService.depublierOffre(offre.id);
+        console.log('📤 Dépublication - Résultat:', result);
       } else {
-        await offreStageService.publierOffre(offre.id);
+        result = await offreStageService.publierOffre(offre.id);
+        console.log('📤 Publication - Résultat:', result);
       }
-      loadOffres();
+
+      // Mettre à jour directement l'offre dans l'état local
+      console.log('🔄 Mise à jour de l\'état local...');
+      setOffres(prevOffres =>
+        prevOffres.map(o =>
+          o.id === offre.id
+            ? { ...o, estPublie: result.estPublie, datePublication: result.datePublication, dateModification: result.dateModification }
+            : o
+        )
+      );
+      console.log('✅ État local mis à jour');
+
+      // Optionnel: recharger toutes les offres pour être sûr
+      // await loadOffres();
     } catch (err) {
+      console.error('❌ Erreur lors de la publication:', err);
       setError('Erreur lors de la publication: ' + (err.response?.data?.error || err.message));
     }
   };

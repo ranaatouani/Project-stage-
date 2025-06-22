@@ -142,13 +142,55 @@ function OffresPubliques() {
           </Box>
 
           <Box display="flex" gap={3}>
-            <Button color="inherit" sx={{ textTransform: 'none', fontSize: '16px' }}>
+            <Button
+              color="inherit"
+              sx={{
+                textTransform: 'none',
+                fontSize: '18px',
+                fontWeight: 'bold',
+                color: '#ffffff',
+                textShadow: '1px 1px 2px rgba(0,0,0,0.3)',
+                '&:hover': {
+                  bgcolor: 'rgba(255,255,255,0.2)',
+                  color: '#ffffff',
+                  transform: 'scale(1.05)'
+                }
+              }}
+            >
               Accueil
             </Button>
-            <Button color="inherit" sx={{ textTransform: 'none', fontSize: '16px' }}>
+            <Button
+              color="inherit"
+              sx={{
+                textTransform: 'none',
+                fontSize: '18px',
+                fontWeight: 'bold',
+                color: '#ffffff',
+                textShadow: '1px 1px 2px rgba(0,0,0,0.3)',
+                '&:hover': {
+                  bgcolor: 'rgba(255,255,255,0.2)',
+                  color: '#ffffff',
+                  transform: 'scale(1.05)'
+                }
+              }}
+            >
               À propos
             </Button>
-            <Button color="inherit" sx={{ textTransform: 'none', fontSize: '16px' }}>
+            <Button
+              color="inherit"
+              sx={{
+                textTransform: 'none',
+                fontSize: '18px',
+                fontWeight: 'bold',
+                color: '#ffffff',
+                textShadow: '1px 1px 2px rgba(0,0,0,0.3)',
+                '&:hover': {
+                  bgcolor: 'rgba(255,255,255,0.2)',
+                  color: '#ffffff',
+                  transform: 'scale(1.05)'
+                }
+              }}
+            >
               Contact
             </Button>
             <Button
@@ -450,6 +492,19 @@ function OffresPubliques() {
                     variant="contained"
                     startIcon={<VisibilityIcon />}
                     onClick={() => handleView(offre)}
+                    sx={{
+                      bgcolor: '#1976d2',
+                      color: '#000000',
+                      fontWeight: 'bold',
+                      '&:hover': {
+                        bgcolor: '#1565c0',
+                        transform: 'translateY(-1px)',
+                        boxShadow: 3
+                      },
+                      '& .MuiSvgIcon-root': {
+                        color: '#000000'
+                      }
+                    }}
                   >
                     Voir les détails
                   </Button>

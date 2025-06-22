@@ -221,7 +221,7 @@ export const getStatusColor = (estPublie) => {
 };
 
 export const getStatusText = (estPublie) => {
-  return estPublie ? 'Publiée' : 'Brouillon';
+  return estPublie ? 'Disponible' : 'Brouillon';
 };
 
 export default { offreStageService, projetStageService };
