@@ -53,9 +53,30 @@ public class SecurityConfig {
                                         "/api/auth/refresh_token",
                                         "/api/auth/verify",
                                         "/api/auth/test",
-                                        "/api/auth/activate-account"
+                                        "/api/auth/activate-account",
+                                        "/api/auth/check-user"
                                 )
                                 .permitAll()
+                                // Endpoints protégés pour les utilisateurs authentifiés
+                                .requestMatchers(
+                                        "/api/auth/user-info",
+                                        "/api/auth/update-profile"
+                                )
+                                .authenticated()
+                                // Endpoints publics pour consulter les offres publiées
+                                .requestMatchers(
+                                        "/api/offres/publiees",
+                                        "/api/offres/publiees/**",
+                                        "/api/offres/recherche/publiees",
+                                        "/api/offres/recentes",
+                                        "/api/projets/avec-offres-publiees"
+                                )
+                                .permitAll()
+                                // Endpoints pour les admins seulement
+                                .requestMatchers(
+                                        "/api/offres/**",
+                                        "/api/projets/**"
+                                ).hasAuthority("Admin")
                                 .requestMatchers("/admin_only/**").hasAuthority("ADMIN")
                                 .anyRequest()
                                 .authenticated()

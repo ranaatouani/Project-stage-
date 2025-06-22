@@ -11,6 +11,7 @@ export default defineConfig({
       components: path.resolve(__dirname, 'src/components'),
       assets: path.resolve(__dirname, 'src/assets'),
       examples: path.resolve(__dirname, 'src/examples'),
+      services: path.resolve(__dirname, 'src/services'),
       // si tu veux être safe :
       pages: path.resolve(__dirname, 'src/pages'),
       context: path.resolve(__dirname, 'src/context'),

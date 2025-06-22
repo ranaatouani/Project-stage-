@@ -45,6 +45,13 @@ const routes = [
   },
   {
     type: "collapse",
+    name: "Gestion des Offres",
+    key: "offres-stage",
+    icon: <span className="material-icons" style={{ fontSize: 20 }}>work</span>,
+    route: "/admin/offres",
+  },
+  {
+    type: "collapse",
     name: "Tables",
     key: "tables",
     icon: <span className="material-icons" style={{ fontSize: 20 }}>table_view</span>,
@@ -76,7 +83,7 @@ const routes = [
     name: "Profile",
     key: "profile",
     icon: <span className="material-icons" style={{ fontSize: 20 }}>person</span>,
-    route: "/profile",
+    route: "/admin/profile",
   },
   {
     type: "collapse",

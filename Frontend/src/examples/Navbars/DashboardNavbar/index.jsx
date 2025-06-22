@@ -36,6 +36,9 @@ import MDInput from "components/MDInput";
 import Breadcrumbs from "examples/Breadcrumbs";
 import NotificationItem from "examples/Items/NotificationItem";
 
+// Custom components
+import UserProfileMenu from "components/UserProfileMenu";
+
 // Custom styles for DashboardNavbar
 import {
   navbar,
@@ -143,11 +146,7 @@ function DashboardNavbar({
               <MDInput label="Search here" />
             </MDBox>
             <MDBox color={light ? "white" : "inherit"}>
-              <Link to="/authentication/sign-in/basic">
-                <IconButton sx={navbarIconButton} size="small" disableRipple>
-                  <span className="material-icons" style={{ fontSize: 20, verticalAlign: "middle" }}>account_circle</span>
-                </IconButton>
-              </Link>
+              <UserProfileMenu />
               <IconButton
                 size="small"
                 disableRipple

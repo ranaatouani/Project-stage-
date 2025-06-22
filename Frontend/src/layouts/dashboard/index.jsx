@@ -15,9 +15,14 @@ Coded by www.creative-tim.com
 
 // @mui material components
 import Grid from "@mui/material/Grid";
+import { Card, CardContent, Button, Typography, Box } from "@mui/material";
+import { Work as WorkIcon, Add as AddIcon } from "@mui/icons-material";
+import { useNavigate } from "react-router-dom";
 
 // Material Dashboard 2 React components
 import MDBox from "components/MDBox";
+import MDButton from "components/MDButton";
+import MDTypography from "components/MDTypography";
 
 // Material Dashboard 2 React example components
 import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
@@ -37,6 +42,7 @@ import OrdersOverview from "layouts/dashboard/components/OrdersOverview";
 
 function Dashboard() {
   const { sales, tasks } = reportsLineChartData;
+  const navigate = useNavigate();
 
   return (
     <DashboardLayout>
@@ -146,7 +152,48 @@ function Dashboard() {
         </MDBox>
         <MDBox>
           <Grid container spacing={3}>
-            <Grid gridColumn="span 12" md={6} lg={8}>
+            {/* Carte de gestion des offres de stage */}
+            <Grid gridColumn="span 12" md={6} lg={4}>
+              <Card sx={{ height: '100%' }}>
+                <CardContent>
+                  <Box display="flex" alignItems="center" mb={2}>
+                    <WorkIcon sx={{ fontSize: 40, color: 'primary.main', mr: 2 }} />
+                    <Box>
+                      <MDTypography variant="h6" fontWeight="medium">
+                        Offres de Stage
+                      </MDTypography>
+                      <Typography variant="body2" color="text.secondary">
+                        Gérer les offres et projets
+                      </Typography>
+                    </Box>
+                  </Box>
+
+                  <Typography variant="body2" color="text.secondary" paragraph>
+                    Créez, modifiez et publiez des offres de stage avec leurs projets associés.
+                  </Typography>
+
+                  <Box display="flex" gap={1} mt={2}>
+                    <MDButton
+                      variant="gradient"
+                      color="info"
+                      size="small"
+                      onClick={() => navigate('/admin/offres')}
+                    >
+                      Gérer les offres
+                    </MDButton>
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      onClick={() => navigate('/offres')}
+                    >
+                      Voir publiques
+                    </Button>
+                  </Box>
+                </CardContent>
+              </Card>
+            </Grid>
+
+            <Grid gridColumn="span 12" md={6} lg={4}>
               <Projects />
             </Grid>
             <Grid gridColumn="span 12" md={6} lg={4}>

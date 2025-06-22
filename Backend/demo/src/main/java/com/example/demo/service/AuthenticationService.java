@@ -1,5 +1,7 @@
 package com.example.demo.service;
 
+import com.example.demo.dto.LoginRequest;
+import com.example.demo.dto.RegisterRequest;
 import com.example.demo.entity.AuthenticationResponse;
 import com.example.demo.entity.Token;
 import com.example.demo.entity.User;
@@ -23,7 +25,9 @@ import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Service
@@ -53,14 +57,29 @@ public class AuthenticationService {
         this.verificationTokenRepository = verificationTokenRepository;
     }
 
-    public AuthenticationResponse register(User request) {
+    public AuthenticationResponse register(RegisterRequest request) {
+        // Logs de débogage
+        System.out.println("=== REGISTER DEBUG ===");
+        System.out.println("Email reçu: " + request.getEmail());
+        System.out.println("Prénom reçu: " + request.getFirstName());
+        System.out.println("Nom reçu: " + request.getLastName());
+        System.out.println("Mot de passe reçu: " + request.getPassword());
+        System.out.println("Rôle reçu: " + request.getRole());
+        System.out.println("======================");
+
         if (repository.findByEmail(request.getEmail()).isPresent()) {
             return new AuthenticationResponse(null, null, "Email already in use");
+        }
+
+        // Vérification que le mot de passe n'est pas null
+        if (request.getPassword() == null || request.getPassword().trim().isEmpty()) {
+            throw new RuntimeException("Le mot de passe ne peut pas être vide");
         }
 
         User user = new User();
         user.setFirstName(request.getFirstName());
         user.setLastName(request.getLastName());
+        user.setUsername(request.getUsername());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setRole(request.getRole());
         user.setEmail(request.getEmail());
@@ -80,28 +99,42 @@ public class AuthenticationService {
         return new AuthenticationResponse(null, null, "User registered successfully. Please check your email to verify your account.");
     }
 
-    public AuthenticationResponse authenticate(User request) {
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        request.getEmail(),
-                        request.getPassword()
-                )
-        );
+    public AuthenticationResponse authenticate(LoginRequest request) {
+        try {
+            // Vérifier d'abord si l'utilisateur existe
+            User user = repository.findByEmail(request.getEmail())
+                    .orElseThrow(() -> new RuntimeException("User not found"));
 
-        User user = repository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+            System.out.println("Utilisateur trouvé: " + user.getEmail());
+            System.out.println("Compte activé: " + user.isEnabled());
+            System.out.println("Mot de passe hashé en DB: " + user.getPassword());
+            System.out.println("Mot de passe fourni: " + request.getPassword());
 
-        if (!user.isEnabled()) {
-            throw new RuntimeException("Account is not verified. Please check your email.");
+            // Vérifier si le compte est activé avant l'authentification
+            if (!user.isEnabled()) {
+                throw new RuntimeException("Account is not verified. Please check your email.");
+            }
+
+            // Tenter l'authentification
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            request.getEmail(),
+                            request.getPassword()
+                    )
+            );
+
+            String accessToken = jwtService.generateAccessToken(user);
+            String refreshToken = jwtService.generateRefreshToken(user);
+
+            revokeAllTokenByUser(user);
+            saveUserToken(accessToken, refreshToken, user);
+
+            return new AuthenticationResponse(accessToken, refreshToken, "User login was successful");
+        } catch (Exception e) {
+            System.out.println("Erreur d'authentification: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Les identifications sont erronées");
         }
-
-        String accessToken = jwtService.generateAccessToken(user);
-        String refreshToken = jwtService.generateRefreshToken(user);
-
-        revokeAllTokenByUser(user);
-        saveUserToken(accessToken, refreshToken, user);
-
-        return new AuthenticationResponse(accessToken, refreshToken, "User login was successful");
     }
 
     private void revokeAllTokenByUser(User user) {
@@ -183,6 +216,65 @@ public class AuthenticationService {
             return true;
         }
         return false;
+    }
+
+    public Map<String, Object> getUserInfo(String email) {
+        User user = repository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
+
+        Map<String, Object> userInfo = new HashMap<>();
+        userInfo.put("email", user.getEmail());
+        userInfo.put("firstName", user.getFirstName());
+        userInfo.put("lastName", user.getLastName());
+        userInfo.put("role", user.getRole());
+        userInfo.put("enabled", user.isEnabled());
+        userInfo.put("accountNonExpired", user.isAccountNonExpired());
+        userInfo.put("accountNonLocked", user.isAccountNonLocked());
+        userInfo.put("credentialsNonExpired", user.isCredentialsNonExpired());
+
+        return userInfo;
+    }
+
+    public Map<String, Object> getCurrentUserInfo(String email) {
+        User user = repository.findByEmail(email).orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
+        Map<String, Object> userInfo = new HashMap<>();
+        userInfo.put("id", user.getId());
+        userInfo.put("email", user.getEmail());
+        userInfo.put("firstName", user.getFirstName());
+        userInfo.put("lastName", user.getLastName());
+        userInfo.put("username", user.getRawUsername());
+        userInfo.put("role", user.getRole().toString());
+        userInfo.put("enabled", user.isEnabled());
+        return userInfo;
+    }
+
+    public Map<String, Object> updateUserProfile(String email, Map<String, String> profileData) {
+        User user = repository.findByEmail(email).orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
+
+        // Mise à jour des champs si fournis
+        if (profileData.containsKey("firstName") && profileData.get("firstName") != null) {
+            user.setFirstName(profileData.get("firstName"));
+        }
+        if (profileData.containsKey("lastName") && profileData.get("lastName") != null) {
+            user.setLastName(profileData.get("lastName"));
+        }
+        if (profileData.containsKey("username") && profileData.get("username") != null) {
+            user.setUsername(profileData.get("username"));
+        }
+        if (profileData.containsKey("email") && profileData.get("email") != null) {
+            // Vérifier que le nouvel email n'est pas déjà utilisé
+            String newEmail = profileData.get("email");
+            if (!newEmail.equals(user.getEmail()) && repository.findByEmail(newEmail).isPresent()) {
+                throw new RuntimeException("Cet email est déjà utilisé par un autre compte");
+            }
+            user.setEmail(newEmail);
+        }
+
+        // Sauvegarder les modifications
+        user = repository.save(user);
+
+        // Retourner les informations mises à jour
+        return getCurrentUserInfo(user.getEmail());
     }
 }
 

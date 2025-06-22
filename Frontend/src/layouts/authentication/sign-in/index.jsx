@@ -80,7 +80,9 @@ function Basic() {
         localStorage.setItem('accessToken', access_token);
         localStorage.setItem('refreshToken', refresh_token);
 
-        console.log('Connexion réussie, redirection vers /dashboard');
+        console.log('Connexion réussie, redirection vers le dashboard');
+
+        // Rediriger directement vers le dashboard
         navigate('/dashboard');
       } else {
         setError(message || "Token non reçu du serveur");
