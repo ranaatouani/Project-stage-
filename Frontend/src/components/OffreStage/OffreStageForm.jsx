@@ -14,7 +14,11 @@ import {
   Tab,
   Box,
   Typography,
-  Divider
+  Divider,
+  Checkbox,
+  FormGroup,
+  FormLabel,
+  Chip
 } from '@mui/material';
 
 import MDBox from 'components/MDBox';
@@ -22,6 +26,49 @@ import MDButton from 'components/MDButton';
 import MDTypography from 'components/MDTypography';
 
 import { offreStageService, projetStageService } from 'services/offreStageService';
+
+// Liste des technologies disponibles par catégorie
+const TECHNOLOGIES = {
+  'Développement Web': [
+    'React', 'Vue.js', 'Angular', 'JavaScript', 'TypeScript', 'HTML5', 'CSS3', 'SASS/SCSS',
+    'Bootstrap', 'Tailwind CSS', 'Material-UI', 'jQuery', 'Node.js', 'Express.js', 'Next.js'
+  ],
+  'Développement Mobile': [
+    'React Native', 'Flutter', 'Swift', 'Kotlin', 'Java', 'Xamarin', 'Ionic', 'Cordova'
+  ],
+  'Backend & API': [
+    'Node.js', 'Python', 'Django', 'Flask', 'Java', 'Spring Boot', 'PHP', 'Laravel',
+    'C#', '.NET', 'Ruby on Rails', 'Go', 'Rust', 'GraphQL', 'REST API'
+  ],
+  'Base de données': [
+    'MySQL', 'PostgreSQL', 'MongoDB', 'Redis', 'SQLite', 'Oracle', 'SQL Server',
+    'Firebase', 'Elasticsearch', 'Cassandra'
+  ],
+  'DevOps & Cloud': [
+    'Docker', 'Kubernetes', 'AWS', 'Azure', 'Google Cloud', 'Jenkins', 'GitLab CI',
+    'GitHub Actions', 'Terraform', 'Ansible'
+  ],
+  'Marketing Digital': [
+    'Google Analytics', 'Google Ads', 'Facebook Ads', 'SEO', 'SEM', 'Content Marketing',
+    'Email Marketing', 'Social Media Marketing', 'HubSpot', 'Mailchimp', 'Hootsuite'
+  ],
+  'Design & UX/UI': [
+    'Figma', 'Adobe XD', 'Sketch', 'Photoshop', 'Illustrator', 'InVision', 'Zeplin',
+    'Principle', 'Framer', 'Canva'
+  ],
+  'Data & Analytics': [
+    'Python', 'R', 'SQL', 'Tableau', 'Power BI', 'Excel', 'Google Data Studio',
+    'Apache Spark', 'Pandas', 'NumPy', 'TensorFlow', 'PyTorch'
+  ],
+  'Gestion de projet': [
+    'Scrum', 'Agile', 'Kanban', 'Jira', 'Trello', 'Asana', 'Monday.com', 'Slack',
+    'Microsoft Project', 'Notion'
+  ],
+  'Autres': [
+    'Git', 'GitHub', 'GitLab', 'Bitbucket', 'Linux', 'Windows', 'macOS', 'Bash',
+    'PowerShell', 'Vim', 'VS Code', 'IntelliJ IDEA'
+  ]
+};
 
 function TabPanel({ children, value, index, ...other }) {
   return (
@@ -58,7 +105,7 @@ function OffreStageForm({ open, onClose, offre = null, onSave }) {
   const [projetData, setProjetData] = useState({
     titre: '',
     description: '',
-    technologiesUtilisees: '',
+    technologiesUtilisees: [],
     objectifs: '',
     competencesRequises: ''
   });
@@ -79,10 +126,17 @@ function OffreStageForm({ open, onClose, offre = null, onSave }) {
       
       if (offre.projetStage) {
         setIncludeProjet(true);
+        // Convertir la chaîne de technologies en tableau si nécessaire
+        const technologies = offre.projetStage.technologiesUtilisees
+          ? (typeof offre.projetStage.technologiesUtilisees === 'string'
+              ? offre.projetStage.technologiesUtilisees.split(', ')
+              : offre.projetStage.technologiesUtilisees)
+          : [];
+
         setProjetData({
           titre: offre.projetStage.titre || '',
           description: offre.projetStage.description || '',
-          technologiesUtilisees: offre.projetStage.technologiesUtilisees || '',
+          technologiesUtilisees: technologies,
           objectifs: offre.projetStage.objectifs || '',
           competencesRequises: offre.projetStage.competencesRequises || ''
         });
@@ -101,7 +155,7 @@ function OffreStageForm({ open, onClose, offre = null, onSave }) {
       setProjetData({
         titre: '',
         description: '',
-        technologiesUtilisees: '',
+        technologiesUtilisees: [],
         objectifs: '',
         competencesRequises: ''
       });
@@ -122,6 +176,15 @@ function OffreStageForm({ open, onClose, offre = null, onSave }) {
     setProjetData(prev => ({
       ...prev,
       [field]: event.target.value
+    }));
+  };
+
+  const handleTechnologyToggle = (technology) => {
+    setProjetData(prev => ({
+      ...prev,
+      technologiesUtilisees: prev.technologiesUtilisees.includes(technology)
+        ? prev.technologiesUtilisees.filter(tech => tech !== technology)
+        : [...prev.technologiesUtilisees, technology]
     }));
   };
 
@@ -165,7 +228,12 @@ function OffreStageForm({ open, onClose, offre = null, onSave }) {
       } else {
         // Création d'une nouvelle offre
         if (includeProjet) {
-          savedOffre = await offreStageService.creerOffreAvecProjet(offreToSave, projetData);
+          // Convertir le tableau de technologies en chaîne pour l'envoi
+          const projetToSave = {
+            ...projetData,
+            technologiesUtilisees: projetData.technologiesUtilisees.join(', ')
+          };
+          savedOffre = await offreStageService.creerOffreAvecProjet(offreToSave, projetToSave);
         } else {
           savedOffre = await offreStageService.creerOffre(offreToSave);
         }
@@ -324,13 +392,55 @@ function OffreStageForm({ open, onClose, offre = null, onSave }) {
               </Grid>
 
               <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  label="Technologies utilisées"
-                  value={projetData.technologiesUtilisees}
-                  onChange={handleProjetChange('technologiesUtilisees')}
-                  placeholder="Ex: React, Node.js, MySQL, Docker..."
-                />
+                <FormLabel component="legend" sx={{ mb: 2, fontWeight: 'bold' }}>
+                  Technologies utilisées
+                </FormLabel>
+
+                {/* Affichage des technologies sélectionnées */}
+                {projetData.technologiesUtilisees.length > 0 && (
+                  <Box sx={{ mb: 2 }}>
+                    <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                      Technologies sélectionnées :
+                    </Typography>
+                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                      {projetData.technologiesUtilisees.map((tech) => (
+                        <Chip
+                          key={tech}
+                          label={tech}
+                          onDelete={() => handleTechnologyToggle(tech)}
+                          color="primary"
+                          variant="outlined"
+                          size="small"
+                        />
+                      ))}
+                    </Box>
+                  </Box>
+                )}
+
+                {/* Liste des technologies par catégorie */}
+                {Object.entries(TECHNOLOGIES).map(([category, technologies]) => (
+                  <Box key={category} sx={{ mb: 3 }}>
+                    <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 'bold', color: 'primary.main' }}>
+                      {category}
+                    </Typography>
+                    <FormGroup row>
+                      {technologies.map((tech) => (
+                        <FormControlLabel
+                          key={tech}
+                          control={
+                            <Checkbox
+                              checked={projetData.technologiesUtilisees.includes(tech)}
+                              onChange={() => handleTechnologyToggle(tech)}
+                              size="small"
+                            />
+                          }
+                          label={tech}
+                          sx={{ minWidth: '200px', mr: 2 }}
+                        />
+                      ))}
+                    </FormGroup>
+                  </Box>
+                ))}
               </Grid>
 
               <Grid item xs={12}>
