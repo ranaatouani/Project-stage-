@@ -44,7 +44,9 @@ public class CandidatureService {
         
         // Créer le dossier d'upload s'il n'existe pas
         try {
-            Files.createDirectories(Paths.get(UPLOAD_DIR));
+            Path uploadPath = Paths.get(UPLOAD_DIR);
+            Files.createDirectories(uploadPath);
+            logger.info("Dossier d'upload CV créé/vérifié: {}", uploadPath.toAbsolutePath());
         } catch (IOException e) {
             logger.error("Erreur lors de la création du dossier d'upload: {}", e.getMessage());
         }
@@ -114,20 +116,37 @@ public class CandidatureService {
         if (originalFilename != null && originalFilename.contains(".")) {
             extension = originalFilename.substring(originalFilename.lastIndexOf("."));
         }
-        
+
         String filename = UUID.randomUUID().toString() + extension;
-        Path filePath = Paths.get(UPLOAD_DIR + filename);
+        Path uploadPath = Paths.get(UPLOAD_DIR);
+        Path filePath = uploadPath.resolve(filename);
+
+        // Créer le dossier s'il n'existe pas
+        Files.createDirectories(uploadPath);
 
         // Copier le fichier
         Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
 
-        return filePath.toString();
+        logger.info("CV sauvegardé: {} -> {}", originalFilename, filePath.toAbsolutePath().toString());
+
+        // Retourner le chemin relatif pour plus de portabilité
+        String relativePath = UPLOAD_DIR + filename;
+        logger.info("Chemin relatif sauvegardé: {}", relativePath);
+        return relativePath;
     }
 
     public List<Candidature> getCandidaturesPourOffre(Long offreStageId) {
         OffreStage offreStage = offreStageRepository.findById(offreStageId)
                 .orElseThrow(() -> new RuntimeException("Offre non trouvée"));
         return candidatureRepository.findByOffreStageOrderByDateCandidatureDesc(offreStage);
+    }
+
+    public Candidature saveCandidature(Candidature candidature) {
+        return candidatureRepository.save(candidature);
+    }
+
+    public List<Candidature> getAllCandidatures() {
+        return candidatureRepository.findAll();
     }
 
     public List<Candidature> getCandidaturesUtilisateur(String username) {

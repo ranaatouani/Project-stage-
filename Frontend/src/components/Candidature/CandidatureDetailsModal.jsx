@@ -67,16 +67,73 @@ function CandidatureDetailsModal({ open, onClose, candidature, onChangeStatut })
     }
   };
 
-  const handleDownloadCV = () => {
-    if (candidature.cvPath) {
+  const handleDownloadCV = async () => {
+    if (!candidature.cvPath && !candidature.cvFilename) {
+      alert('Aucun CV disponible pour cette candidature');
+      return;
+    }
+
+    try {
+      console.log('Tentative de téléchargement du CV pour candidature ID:', candidature.id);
+      console.log('Nom du fichier:', candidature.cvFilename);
+      console.log('Chemin du fichier:', candidature.cvPath);
+
+      const token = localStorage.getItem('accessToken');
+      console.log('Token présent:', !!token);
+
+      const response = await fetch(`http://localhost:8090/api/candidatures/${candidature.id}/cv`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/octet-stream'
+        }
+      });
+
+      console.log('Statut de la réponse:', response.status);
+      console.log('Headers de la réponse:', response.headers);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Erreur du serveur:', errorText);
+
+        if (response.status === 404) {
+          alert('CV non trouvé sur le serveur. Le fichier a peut-être été supprimé.');
+        } else if (response.status === 401) {
+          alert('Accès non autorisé. Veuillez vous reconnecter.');
+        } else if (response.status === 403) {
+          alert('Accès interdit. Vous n\'avez pas les permissions nécessaires.');
+        } else {
+          alert(`Erreur lors du téléchargement du CV (${response.status}): ${errorText}`);
+        }
+        return;
+      }
+
+      // Récupérer le blob
+      const blob = await response.blob();
+      console.log('Taille du blob:', blob.size, 'bytes');
+      console.log('Type du blob:', blob.type);
+
+      if (blob.size === 0) {
+        alert('Le fichier CV est vide');
+        return;
+      }
+
       // Créer un lien de téléchargement
+      const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
-      link.href = `http://localhost:8090/api/candidatures/${candidature.id}/cv`;
-      link.download = candidature.cvFilename || 'CV.pdf';
-      link.target = '_blank';
+      link.href = url;
+      link.download = candidature.cvFilename || `CV_${candidature.nom}_${candidature.prenom}.pdf`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+
+      // Nettoyer l'URL
+      window.URL.revokeObjectURL(url);
+
+      console.log('Téléchargement réussi');
+    } catch (error) {
+      console.error('Erreur lors du téléchargement:', error);
+      alert(`Erreur lors du téléchargement du CV: ${error.message}`);
     }
   };
 
@@ -208,12 +265,12 @@ function CandidatureDetailsModal({ open, onClose, candidature, onChangeStatut })
           </Grid>
 
           {/* CV */}
-          {candidature.cvFilename && (
-            <Grid item xs={12}>
-              <Divider sx={{ my: 2 }} />
-              <MDTypography variant="h6" fontWeight="medium" gutterBottom>
-                Curriculum Vitae
-              </MDTypography>
+          <Grid item xs={12}>
+            <Divider sx={{ my: 2 }} />
+            <MDTypography variant="h6" fontWeight="medium" gutterBottom>
+              Curriculum Vitae
+            </MDTypography>
+            {candidature.cvFilename ? (
               <Paper
                 variant="outlined"
                 sx={{
@@ -226,9 +283,14 @@ function CandidatureDetailsModal({ open, onClose, candidature, onChangeStatut })
               >
                 <Box display="flex" alignItems="center">
                   <FileIcon sx={{ mr: 1, color: 'primary.main' }} />
-                  <Typography variant="body1">
-                    {candidature.cvFilename}
-                  </Typography>
+                  <Box>
+                    <Typography variant="body1">
+                      {candidature.cvFilename}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      Fichier disponible
+                    </Typography>
+                  </Box>
                 </Box>
                 <MDButton
                   variant="outlined"
@@ -240,8 +302,21 @@ function CandidatureDetailsModal({ open, onClose, candidature, onChangeStatut })
                   Télécharger
                 </MDButton>
               </Paper>
-            </Grid>
-          )}
+            ) : (
+              <Paper
+                variant="outlined"
+                sx={{
+                  p: 2,
+                  textAlign: 'center',
+                  bgcolor: 'grey.50'
+                }}
+              >
+                <Typography variant="body2" color="text.secondary">
+                  Aucun CV n'a été téléchargé avec cette candidature
+                </Typography>
+              </Paper>
+            )}
+          </Grid>
 
           {/* Lettre de motivation */}
           {candidature.motivation && (

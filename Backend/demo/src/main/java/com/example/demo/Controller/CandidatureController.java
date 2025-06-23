@@ -19,6 +19,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 
@@ -205,14 +206,43 @@ public class CandidatureController {
     @GetMapping("/{id}/cv")
     public ResponseEntity<Resource> telechargerCV(@PathVariable Long id) {
         try {
+            logger.info("Tentative de téléchargement du CV pour la candidature ID: {}", id);
+
             Candidature candidature = candidatureService.getCandidatureById(id);
 
-            if (candidature.getCvPath() == null) {
+            if (candidature.getCvPath() == null || candidature.getCvPath().isEmpty()) {
+                logger.warn("Aucun CV trouvé pour la candidature ID: {}", id);
                 return ResponseEntity.notFound().build();
             }
 
             Path filePath = Paths.get(candidature.getCvPath());
-            Resource resource = new UrlResource(filePath.toUri());
+            logger.info("Chemin du fichier CV (original): {}", candidature.getCvPath());
+            logger.info("Chemin du fichier CV (absolu): {}", filePath.toAbsolutePath().toString());
+
+            if (!Files.exists(filePath)) {
+                logger.warn("Le fichier CV n'existe pas au chemin original: {}", filePath.toAbsolutePath().toString());
+
+                // Essayons avec un chemin relatif depuis le dossier uploads
+                String filename = candidature.getCvFilename();
+                if (filename != null && !filename.isEmpty()) {
+                    Path alternativePath = Paths.get("uploads/cv/" + filename);
+                    logger.info("Tentative avec chemin alternatif: {}", alternativePath.toAbsolutePath().toString());
+
+                    if (Files.exists(alternativePath)) {
+                        filePath = alternativePath;
+                        logger.info("Fichier trouvé avec chemin alternatif");
+                    } else {
+                        logger.error("Le fichier CV n'existe pas non plus au chemin alternatif: {}", alternativePath.toAbsolutePath().toString());
+                        return ResponseEntity.notFound().build();
+                    }
+                } else {
+                    logger.error("Aucun nom de fichier disponible pour essayer un chemin alternatif");
+                    return ResponseEntity.notFound().build();
+                }
+            }
+
+            Resource resource = new FileSystemResource(filePath);
+            logger.info("Taille du fichier: {} bytes", Files.size(filePath));
 
             if (resource.exists() && resource.isReadable()) {
                 String contentType = Files.probeContentType(filePath);
@@ -220,17 +250,91 @@ public class CandidatureController {
                     contentType = "application/octet-stream";
                 }
 
+                String filename = candidature.getCvFilename();
+                if (filename == null || filename.isEmpty()) {
+                    filename = "CV_" + candidature.getNom() + "_" + candidature.getPrenom() + ".pdf";
+                }
+
+                logger.info("Téléchargement du CV réussi: {}", filename);
+
                 return ResponseEntity.ok()
                         .contentType(MediaType.parseMediaType(contentType))
                         .header(HttpHeaders.CONTENT_DISPOSITION,
-                                "attachment; filename=\"" + candidature.getCvFilename() + "\"")
+                                "attachment; filename=\"" + filename + "\"")
                         .body(resource);
             } else {
+                logger.error("Le fichier CV n'est pas lisible: {}", filePath.toString());
                 return ResponseEntity.notFound().build();
             }
         } catch (Exception e) {
-            logger.error("Erreur lors du téléchargement du CV: {}", e.getMessage());
-            return ResponseEntity.badRequest().build();
+            logger.error("Erreur lors du téléchargement du CV pour la candidature ID {}: {}", id, e.getMessage(), e);
+            return ResponseEntity.status(500).build();
+        }
+    }
+
+    // Endpoint de debug pour lister les fichiers CV (à supprimer en production)
+    @GetMapping("/debug/cv-files")
+    public ResponseEntity<Map<String, Object>> listCVFiles() {
+        try {
+            Map<String, Object> result = new HashMap<>();
+            Path uploadDir = Paths.get("uploads/cv/");
+
+            result.put("uploadDir", uploadDir.toAbsolutePath().toString());
+            result.put("exists", Files.exists(uploadDir));
+
+            if (Files.exists(uploadDir)) {
+                List<String> files = Files.list(uploadDir)
+                    .map(path -> path.getFileName().toString())
+                    .collect(java.util.stream.Collectors.toList());
+                result.put("files", files);
+                result.put("fileCount", files.size());
+            }
+
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            logger.error("Erreur lors du listage des fichiers CV: {}", e.getMessage());
+            Map<String, Object> error = new HashMap<>();
+            error.put("error", e.getMessage());
+            return ResponseEntity.badRequest().body(error);
+        }
+    }
+
+    // Endpoint de debug pour corriger les chemins CV (à supprimer en production)
+    @PostMapping("/debug/fix-cv-paths")
+    public ResponseEntity<Map<String, Object>> fixCVPaths() {
+        try {
+            List<Candidature> candidatures = candidatureService.getAllCandidatures();
+            Map<String, Object> result = new HashMap<>();
+            int fixed = 0;
+
+            for (Candidature candidature : candidatures) {
+                if (candidature.getCvPath() != null && candidature.getCvFilename() != null) {
+                    String currentPath = candidature.getCvPath();
+                    String expectedPath = "uploads/cv/" + candidature.getCvFilename();
+
+                    // Si le chemin actuel est différent du chemin attendu
+                    if (!currentPath.equals(expectedPath)) {
+                        // Vérifier si le fichier existe avec le nouveau chemin
+                        Path newPath = Paths.get(expectedPath);
+                        if (Files.exists(newPath)) {
+                            candidature.setCvPath(expectedPath);
+                            candidatureService.saveCandidature(candidature);
+                            fixed++;
+                            logger.info("Chemin CV corrigé pour candidature {}: {} -> {}",
+                                      candidature.getId(), currentPath, expectedPath);
+                        }
+                    }
+                }
+            }
+
+            result.put("candidaturesFixed", fixed);
+            result.put("message", "Chemins CV corrigés avec succès");
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            logger.error("Erreur lors de la correction des chemins CV: {}", e.getMessage());
+            Map<String, Object> error = new HashMap<>();
+            error.put("error", e.getMessage());
+            return ResponseEntity.badRequest().body(error);
         }
     }
 }

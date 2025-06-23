@@ -89,7 +89,9 @@ public class SecurityConfig {
                                         "/api/candidatures/*/statut",
                                         "/api/candidatures/recherche",
                                         "/api/candidatures/statistiques",
-                                        "/api/candidatures/*/cv"
+                                        "/api/candidatures/*/cv",
+                                        "/api/candidatures/debug/cv-files",
+                                        "/api/candidatures/debug/fix-cv-paths"
                                 ).hasAuthority("Admin")
                                 .requestMatchers("/admin_only/**").hasAuthority("ADMIN")
                                 .anyRequest()

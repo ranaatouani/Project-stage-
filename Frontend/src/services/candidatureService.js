@@ -100,6 +100,12 @@ export const candidatureService = {
   async getStatistiquesCandidatures() {
     const response = await apiClient.get('/candidatures/statistiques');
     return response.data;
+  },
+
+  // Debug: lister les fichiers CV (à supprimer en production)
+  async debugListCVFiles() {
+    const response = await apiClient.get('/candidatures/debug/cv-files');
+    return response.data;
   }
 };
 
