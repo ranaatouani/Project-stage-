@@ -12,6 +12,7 @@ import MDBox from 'components/MDBox';
 import MDButton from 'components/MDButton';
 import MDTypography from 'components/MDTypography';
 import UserProfileMenu from 'components/UserProfileMenu';
+import NotificationBell from 'components/Notifications/NotificationBell';
 import useAuth from 'hooks/useAuth';
 
 function PublicNavbar() {
@@ -66,6 +67,7 @@ function PublicNavbar() {
                 >
                   {isAdmin ? 'Dashboard Admin' : 'Mon Espace'}
                 </MDButton>
+                <NotificationBell />
                 <UserProfileMenu />
               </>
             ) : (

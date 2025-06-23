@@ -12,6 +12,8 @@ import TextField from "@mui/material/TextField";
 import InputAdornment from "@mui/material/InputAdornment";
 import Alert from "@mui/material/Alert";
 import CircularProgress from "@mui/material/CircularProgress";
+import Tabs from "@mui/material/Tabs";
+import Tab from "@mui/material/Tab";
 
 // @mui icons
 import SearchIcon from "@mui/icons-material/Search";
@@ -37,6 +39,7 @@ import { candidatureService } from "services/candidatureService";
 // Components
 import OffreDetailsModal from "components/OffreStage/OffreDetailsModal";
 import CandidatureModal from "components/OffreStage/CandidatureModal";
+import MesCandidatures from "components/Candidatures/MesCandidatures";
 
 function AccueilClient() {
   const navigate = useNavigate();
@@ -45,6 +48,7 @@ function AccueilClient() {
   const [error, setError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredOffres, setFilteredOffres] = useState([]);
+  const [currentTab, setCurrentTab] = useState(0);
 
   // États pour les modals
   const [selectedOffre, setSelectedOffre] = useState(null);
@@ -123,6 +127,10 @@ function AccueilClient() {
     }
   };
 
+  const handleTabChange = (event, newValue) => {
+    setCurrentTab(newValue);
+  };
+
   return (
     <DashboardLayout>
       <DashboardNavbar />
@@ -137,23 +145,33 @@ function AccueilClient() {
           </Typography>
         </MDBox>
 
-        {/* Barre de recherche */}
+        {/* Onglets de navigation */}
         <MDBox mb={4}>
-          <TextField
-            fullWidth
-            placeholder="Rechercher par titre, entreprise, localisation..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <SearchIcon />
-                </InputAdornment>
-              ),
-            }}
-            sx={{ maxWidth: 600 }}
-          />
+          <Tabs value={currentTab} onChange={handleTabChange} aria-label="client tabs">
+            <Tab label="Offres disponibles" />
+            <Tab label="Mes candidatures" />
+          </Tabs>
         </MDBox>
+
+        {currentTab === 0 && (
+          <>
+            {/* Barre de recherche */}
+            <MDBox mb={4}>
+              <TextField
+                fullWidth
+                placeholder="Rechercher par titre, entreprise, localisation..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon />
+                    </InputAdornment>
+                  ),
+                }}
+                sx={{ maxWidth: 600 }}
+              />
+            </MDBox>
 
         {/* Statistiques rapides pour le client */}
         <MDBox mb={4}>
@@ -307,6 +325,12 @@ function AccueilClient() {
               </Grid>
             ))}
           </Grid>
+        )}
+          </>
+        )}
+
+        {currentTab === 1 && (
+          <MesCandidatures />
         )}
 
         {/* Modals */}

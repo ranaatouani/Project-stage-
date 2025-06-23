@@ -38,6 +38,7 @@ import NotificationItem from "examples/Items/NotificationItem";
 
 // Custom components
 import UserProfileMenu from "components/UserProfileMenu";
+import NotificationBell from "components/Notifications/NotificationBell";
 
 // Custom styles for DashboardNavbar
 import {
@@ -146,6 +147,7 @@ function DashboardNavbar({
               <MDInput label="Search here" />
             </MDBox>
             <MDBox color={light ? "white" : "inherit"}>
+              <NotificationBell />
               <UserProfileMenu />
               <IconButton
                 size="small"
@@ -165,19 +167,6 @@ function DashboardNavbar({
               >
                 <span className="material-icons" style={{ fontSize: 20, verticalAlign: "middle" }}>settings</span>
               </IconButton>
-              <IconButton
-                size="small"
-                disableRipple
-                color="inherit"
-                sx={navbarIconButton}
-                aria-controls="notification-menu"
-                aria-haspopup="true"
-                variant="contained"
-                onClick={handleOpenMenu}
-              >
-                <span className="material-icons" style={{ fontSize: 20, verticalAlign: "middle" }}>notifications</span>
-              </IconButton>
-              {renderMenu()}
             </MDBox>
           </MDBox>
         )}

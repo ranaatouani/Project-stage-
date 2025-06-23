@@ -84,14 +84,22 @@ public class CandidatureController {
     @GetMapping("/mes-candidatures")
     public ResponseEntity<List<Candidature>> getMesCandidatures(Authentication authentication) {
         try {
+            logger.info("Tentative de récupération des candidatures pour l'utilisateur");
+
             if (authentication == null) {
+                logger.warn("Authentication est null");
                 return ResponseEntity.status(401).build();
             }
 
-            List<Candidature> candidatures = candidatureService.getCandidaturesUtilisateur(authentication.getName());
+            String username = authentication.getName();
+            logger.info("Utilisateur authentifié: {}", username);
+
+            List<Candidature> candidatures = candidatureService.getCandidaturesUtilisateur(username);
+            logger.info("Nombre de candidatures trouvées: {}", candidatures.size());
+
             return ResponseEntity.ok(candidatures);
         } catch (Exception e) {
-            logger.error("Erreur lors de la récupération des candidatures utilisateur: {}", e.getMessage());
+            logger.error("Erreur lors de la récupération des candidatures utilisateur: {}", e.getMessage(), e);
             return ResponseEntity.badRequest().build();
         }
     }

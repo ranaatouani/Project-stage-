@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -34,6 +35,9 @@ public class CandidatureService {
     private final CandidatureRepository candidatureRepository;
     private final OffreStageRepository offreStageRepository;
     private final UserRepository userRepository;
+
+    @Autowired
+    private NotificationService notificationService;
 
     public CandidatureService(CandidatureRepository candidatureRepository,
                              OffreStageRepository offreStageRepository,
@@ -69,7 +73,9 @@ public class CandidatureService {
         // Récupérer l'utilisateur si connecté
         User candidat = null;
         if (username != null) {
-            candidat = userRepository.findByUsername(username).orElse(null);
+            candidat = userRepository.findByEmail(username)
+                    .or(() -> userRepository.findByUsername(username))
+                    .orElse(null);
         }
 
         // Vérifier si l'utilisateur n'a pas déjà candidaté
@@ -105,6 +111,9 @@ public class CandidatureService {
 
         candidature = candidatureRepository.save(candidature);
         logger.info("Candidature créée avec succès: {}", candidature.getId());
+
+        // Créer une notification pour le candidat
+        notificationService.creerNotificationNouvelleCandidature(candidature);
 
         return candidature;
     }
@@ -149,10 +158,20 @@ public class CandidatureService {
         return candidatureRepository.findAll();
     }
 
-    public List<Candidature> getCandidaturesUtilisateur(String username) {
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
-        return candidatureRepository.findByCandidat(user);
+    public List<Candidature> getCandidaturesUtilisateur(String emailOrUsername) {
+        logger.info("Recherche des candidatures pour l'utilisateur: {}", emailOrUsername);
+
+        // Essayer d'abord par email, puis par username
+        User user = userRepository.findByEmail(emailOrUsername)
+                .or(() -> userRepository.findByUsername(emailOrUsername))
+                .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé: " + emailOrUsername));
+
+        logger.info("Utilisateur trouvé: {} (ID: {}, Email: {})", user.getUsername(), user.getId(), user.getEmail());
+
+        List<Candidature> candidatures = candidatureRepository.findByCandidat(user);
+        logger.info("Nombre de candidatures trouvées pour {}: {}", emailOrUsername, candidatures.size());
+
+        return candidatures;
     }
 
     public List<Candidature> getToutesCandidatures() {
@@ -166,8 +185,22 @@ public class CandidatureService {
 
     public Candidature changerStatutCandidature(Long candidatureId, StatutCandidature nouveauStatut) {
         Candidature candidature = getCandidatureById(candidatureId);
+        StatutCandidature ancienStatut = candidature.getStatut();
+
         candidature.setStatut(nouveauStatut);
-        return candidatureRepository.save(candidature);
+        candidature = candidatureRepository.save(candidature);
+
+        // Créer une notification si le statut a changé
+        if (ancienStatut != nouveauStatut) {
+            try {
+                notificationService.creerNotificationChangementStatut(candidature, ancienStatut);
+            } catch (Exception e) {
+                logger.error("Erreur lors de la création de la notification: {}", e.getMessage());
+                // Ne pas faire échouer le changement de statut si la notification échoue
+            }
+        }
+
+        return candidature;
     }
 
     public void supprimerCandidature(Long candidatureId) {

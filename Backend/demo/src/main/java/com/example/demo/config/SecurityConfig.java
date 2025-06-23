@@ -62,7 +62,8 @@ public class SecurityConfig {
                                         "/api/auth/user-info",
                                         "/api/auth/me",
                                         "/api/auth/update-profile",
-                                        "/api/candidatures/mes-candidatures"
+                                        "/api/candidatures/mes-candidatures",
+                                        "/api/notifications/**"
                                 )
                                 .authenticated()
                                 // Endpoints publics pour les candidatures
