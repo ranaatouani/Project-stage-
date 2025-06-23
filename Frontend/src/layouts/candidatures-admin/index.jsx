@@ -33,6 +33,7 @@ import PersonIcon from "@mui/icons-material/Person";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CancelIcon from "@mui/icons-material/Cancel";
 import ScheduleIcon from "@mui/icons-material/Schedule";
+import AttachFileIcon from "@mui/icons-material/AttachFile";
 
 // Material Dashboard 2 React components
 import MDBox from "components/MDBox";
@@ -47,6 +48,9 @@ import Footer from "examples/Footer";
 // Services
 import { candidatureService } from "services/candidatureService";
 
+// Components
+import CandidatureDetailsModal from "components/Candidature/CandidatureDetailsModal";
+
 function CandidaturesAdmin() {
   const navigate = useNavigate();
   const [candidatures, setCandidatures] = useState([]);
@@ -56,6 +60,7 @@ function CandidaturesAdmin() {
   const [filteredCandidatures, setFilteredCandidatures] = useState([]);
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedCandidature, setSelectedCandidature] = useState(null);
+  const [detailsModalOpen, setDetailsModalOpen] = useState(false);
 
   useEffect(() => {
     loadCandidatures();
@@ -137,10 +142,21 @@ function CandidaturesAdmin() {
       await candidatureService.changerStatutCandidature(selectedCandidature.id, nouveauStatut);
       await loadCandidatures(); // Recharger les données
       handleMenuClose();
+      setDetailsModalOpen(false); // Fermer le modal de détails aussi
     } catch (err) {
       console.error('Erreur lors du changement de statut:', err);
       setError('Erreur lors du changement de statut');
     }
+  };
+
+  const handleVoirDetails = (candidature) => {
+    setSelectedCandidature(candidature);
+    setDetailsModalOpen(true);
+  };
+
+  const handleCloseDetailsModal = () => {
+    setDetailsModalOpen(false);
+    setSelectedCandidature(null);
   };
 
   return (
@@ -264,9 +280,25 @@ function CandidaturesAdmin() {
                           <Box display="flex" alignItems="center">
                             <PersonIcon sx={{ mr: 1, color: 'primary.main' }} />
                             <Box>
-                              <Typography variant="body2" fontWeight="medium">
-                                {candidature.prenom} {candidature.nom}
-                              </Typography>
+                              <Box display="flex" alignItems="center" gap={1}>
+                                <Typography
+                                  variant="body2"
+                                  fontWeight="medium"
+                                  sx={{
+                                    cursor: 'pointer',
+                                    '&:hover': { color: 'primary.main', textDecoration: 'underline' }
+                                  }}
+                                  onClick={() => handleVoirDetails(candidature)}
+                                >
+                                  {candidature.prenom} {candidature.nom}
+                                </Typography>
+                                {candidature.cvFilename && (
+                                  <AttachFileIcon
+                                    sx={{ fontSize: 16, color: 'success.main' }}
+                                    title="CV disponible"
+                                  />
+                                )}
+                              </Box>
                             </Box>
                           </Box>
                         </TableCell>
@@ -307,12 +339,22 @@ function CandidaturesAdmin() {
                           />
                         </TableCell>
                         <TableCell>
-                          <IconButton
-                            size="small"
-                            onClick={(e) => handleMenuOpen(e, candidature)}
-                          >
-                            <MoreVertIcon />
-                          </IconButton>
+                          <Box display="flex" gap={1}>
+                            <MDButton
+                              variant="outlined"
+                              color="info"
+                              size="small"
+                              onClick={() => handleVoirDetails(candidature)}
+                            >
+                              Détails
+                            </MDButton>
+                            <IconButton
+                              size="small"
+                              onClick={(e) => handleMenuOpen(e, candidature)}
+                            >
+                              <MoreVertIcon />
+                            </IconButton>
+                          </Box>
                         </TableCell>
                       </TableRow>
                     ))}
@@ -354,6 +396,14 @@ function CandidaturesAdmin() {
             Remettre en attente
           </MenuItem>
         </Menu>
+
+        {/* Modal de détails de candidature */}
+        <CandidatureDetailsModal
+          open={detailsModalOpen}
+          onClose={handleCloseDetailsModal}
+          candidature={selectedCandidature}
+          onChangeStatut={handleChangeStatut}
+        />
       </MDBox>
       <Footer />
     </DashboardLayout>

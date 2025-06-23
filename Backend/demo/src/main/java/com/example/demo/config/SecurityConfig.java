@@ -88,7 +88,8 @@ public class SecurityConfig {
                                         "/api/candidatures/offre/**",
                                         "/api/candidatures/*/statut",
                                         "/api/candidatures/recherche",
-                                        "/api/candidatures/statistiques"
+                                        "/api/candidatures/statistiques",
+                                        "/api/candidatures/*/cv"
                                 ).hasAuthority("Admin")
                                 .requestMatchers("/admin_only/**").hasAuthority("ADMIN")
                                 .anyRequest()

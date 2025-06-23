@@ -13,6 +13,14 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 
 @RestController
 @RequestMapping("/api/candidatures")
@@ -168,28 +176,60 @@ public class CandidatureController {
     public ResponseEntity<Map<String, Object>> getStatistiquesCandidatures() {
         try {
             Map<String, Object> stats = new HashMap<>();
-            
+
             List<Candidature> toutes = candidatureService.getToutesCandidatures();
             stats.put("total", toutes.size());
-            
-            long enAttente = toutes.stream().mapToLong(c -> 
+
+            long enAttente = toutes.stream().mapToLong(c ->
                 c.getStatut() == StatutCandidature.EN_ATTENTE ? 1 : 0).sum();
             stats.put("enAttente", enAttente);
-            
-            long acceptees = toutes.stream().mapToLong(c -> 
+
+            long acceptees = toutes.stream().mapToLong(c ->
                 c.getStatut() == StatutCandidature.ACCEPTEE ? 1 : 0).sum();
             stats.put("acceptees", acceptees);
-            
-            long refusees = toutes.stream().mapToLong(c -> 
+
+            long refusees = toutes.stream().mapToLong(c ->
                 c.getStatut() == StatutCandidature.REFUSEE ? 1 : 0).sum();
             stats.put("refusees", refusees);
-            
+
             List<Candidature> recentes = candidatureService.getCandidaturesRecentes();
             stats.put("recentes", recentes.size());
-            
+
             return ResponseEntity.ok(stats);
         } catch (Exception e) {
             logger.error("Erreur lors de la récupération des statistiques: {}", e.getMessage());
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @GetMapping("/{id}/cv")
+    public ResponseEntity<Resource> telechargerCV(@PathVariable Long id) {
+        try {
+            Candidature candidature = candidatureService.getCandidatureById(id);
+
+            if (candidature.getCvPath() == null) {
+                return ResponseEntity.notFound().build();
+            }
+
+            Path filePath = Paths.get(candidature.getCvPath());
+            Resource resource = new UrlResource(filePath.toUri());
+
+            if (resource.exists() && resource.isReadable()) {
+                String contentType = Files.probeContentType(filePath);
+                if (contentType == null) {
+                    contentType = "application/octet-stream";
+                }
+
+                return ResponseEntity.ok()
+                        .contentType(MediaType.parseMediaType(contentType))
+                        .header(HttpHeaders.CONTENT_DISPOSITION,
+                                "attachment; filename=\"" + candidature.getCvFilename() + "\"")
+                        .body(resource);
+            } else {
+                return ResponseEntity.notFound().build();
+            }
+        } catch (Exception e) {
+            logger.error("Erreur lors du téléchargement du CV: {}", e.getMessage());
             return ResponseEntity.badRequest().build();
         }
     }
