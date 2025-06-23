@@ -39,6 +39,7 @@ import VerifyEmail from "layouts/authentication/components/verify-email";
 import OffresStage from "layouts/offres-stage";
 import OffresPubliques from "layouts/offres-publiques";
 import AdminProfile from "layouts/admin-profile";
+import AccueilClient from "layouts/accueil-client";
 import ProtectedRoute from "components/ProtectedRoute";
 
 // Routes pour la sidebar
@@ -105,7 +106,7 @@ function App() {
   }, [pathname]);
 
   // Vérifier si on est sur une page qui nécessite la sidebar
-  const showSidebar = pathname.startsWith('/dashboard') || pathname.startsWith('/admin');
+  const showSidebar = pathname.startsWith('/dashboard') || pathname.startsWith('/admin') || pathname.startsWith('/client');
 
   const configsButton = (
     <MDBox
@@ -141,6 +142,16 @@ function App() {
       <Route path="/auth/sign-in" element={<SignIn />} />
       <Route path="/auth/sign-up" element={<SignUp />} />
       <Route path="/auth/verify-email" element={<VerifyEmail />} />
+
+      {/* Routes protégées (client) */}
+      <Route
+        path="/client/accueil"
+        element={
+          <ProtectedRoute requireAdmin={false}>
+            <AccueilClient />
+          </ProtectedRoute>
+        }
+      />
 
       {/* Routes protégées (admin) */}
       <Route

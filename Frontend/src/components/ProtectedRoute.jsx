@@ -7,6 +7,7 @@ function ProtectedRoute({ children, requireAdmin = false }) {
   const [loading, setLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [userRole, setUserRole] = useState('');
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -22,9 +23,18 @@ function ProtectedRoute({ children, requireAdmin = false }) {
         return;
       }
 
-      // Si on a un token, on considère l'utilisateur comme authentifié et admin
-      setIsAuthenticated(true);
-      setIsAdmin(true); // Pour simplifier, on considère tous les utilisateurs connectés comme admin
+      // Vérifier le token et récupérer les informations utilisateur
+      const response = await axios.get('http://localhost:8090/api/auth/me', {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+
+      if (response.data) {
+        setIsAuthenticated(true);
+        setUserRole(response.data.role);
+        setIsAdmin(response.data.role === 'Admin');
+      }
 
     } catch (err) {
       console.error('Erreur d\'authentification:', err);

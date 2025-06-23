@@ -39,6 +39,7 @@ import {
 import MDBox from 'components/MDBox';
 import MDButton from 'components/MDButton';
 import MDTypography from 'components/MDTypography';
+import PublicNavbar from 'components/PublicNavbar';
 
 import { offreStageService, formatDate, formatDuree } from 'services/offreStageService';
 import OffreStageDetails from 'components/OffreStage/OffreStageDetails';
@@ -132,83 +133,7 @@ function OffresPubliques() {
       overflowX: 'hidden'
     }}>
       {/* Navigation Header */}
-      <AppBar position="static" sx={{ bgcolor: '#1976d2', boxShadow: 3 }}>
-        <Toolbar sx={{ justifyContent: 'space-between' }}>
-          <Box display="flex" alignItems="center">
-            <WorkIcon sx={{ mr: 2, fontSize: 32 }} />
-            <Typography variant="h5" component="div" fontWeight="bold">
-              StageConnect
-            </Typography>
-          </Box>
-
-          <Box display="flex" gap={3}>
-            <Button
-              color="inherit"
-              sx={{
-                textTransform: 'none',
-                fontSize: '18px',
-                fontWeight: 'bold',
-                color: '#ffffff',
-                textShadow: '1px 1px 2px rgba(0,0,0,0.3)',
-                '&:hover': {
-                  bgcolor: 'rgba(255,255,255,0.2)',
-                  color: '#ffffff',
-                  transform: 'scale(1.05)'
-                }
-              }}
-            >
-              Accueil
-            </Button>
-            <Button
-              color="inherit"
-              sx={{
-                textTransform: 'none',
-                fontSize: '18px',
-                fontWeight: 'bold',
-                color: '#ffffff',
-                textShadow: '1px 1px 2px rgba(0,0,0,0.3)',
-                '&:hover': {
-                  bgcolor: 'rgba(255,255,255,0.2)',
-                  color: '#ffffff',
-                  transform: 'scale(1.05)'
-                }
-              }}
-            >
-              À propos
-            </Button>
-            <Button
-              color="inherit"
-              sx={{
-                textTransform: 'none',
-                fontSize: '18px',
-                fontWeight: 'bold',
-                color: '#ffffff',
-                textShadow: '1px 1px 2px rgba(0,0,0,0.3)',
-                '&:hover': {
-                  bgcolor: 'rgba(255,255,255,0.2)',
-                  color: '#ffffff',
-                  transform: 'scale(1.05)'
-                }
-              }}
-            >
-              Contact
-            </Button>
-            <Button
-              variant="outlined"
-              color="inherit"
-              href="/auth/sign-in"
-              sx={{
-                textTransform: 'none',
-                fontSize: '16px',
-                borderColor: 'white',
-                '&:hover': { bgcolor: 'rgba(255,255,255,0.1)' }
-              }}
-            >
-              Connexion
-            </Button>
-          </Box>
-        </Toolbar>
-      </AppBar>
+      <PublicNavbar />
 
       {/* Hero Section */}
       <Box

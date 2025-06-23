@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Menu,
@@ -13,32 +13,13 @@ import {
 } from '@mui/material';
 import MDBox from 'components/MDBox';
 import MDTypography from 'components/MDTypography';
-import authService from 'services/authService';
+import useAuth from 'hooks/useAuth';
 
 function UserProfileMenu() {
   const [anchorEl, setAnchorEl] = useState(null);
-  const [userInfo, setUserInfo] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    role: ''
-  });
   const navigate = useNavigate();
+  const { user, isAdmin, isClient, logout } = useAuth();
   const open = Boolean(anchorEl);
-
-  // Charger les informations utilisateur au montage
-  useEffect(() => {
-    loadUserInfo();
-  }, []);
-
-  const loadUserInfo = async () => {
-    try {
-      const userData = await authService.getCurrentUser();
-      setUserInfo(userData);
-    } catch (error) {
-      console.error('Erreur lors du chargement des informations utilisateur:', error);
-    }
-  };
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -50,21 +31,40 @@ function UserProfileMenu() {
 
   const handleProfile = () => {
     handleClose();
-    navigate('/admin/profile');
+    if (isAdmin) {
+      navigate('/admin/profile');
+    } else {
+      navigate('/client/profile'); // À créer plus tard
+    }
+  };
+
+  const handleDashboard = () => {
+    handleClose();
+    if (isAdmin) {
+      navigate('/dashboard');
+    } else {
+      navigate('/client/accueil');
+    }
   };
 
   const handleLogout = () => {
     handleClose();
-    // Utiliser le service d'authentification pour la déconnexion
-    authService.logout();
+    logout();
   };
 
   const getInitials = () => {
-    return `${userInfo.firstName?.charAt(0) || ''}${userInfo.lastName?.charAt(0) || ''}`.toUpperCase();
+    if (!user) return 'U';
+    return `${user.firstName?.charAt(0) || ''}${user.lastName?.charAt(0) || ''}`.toUpperCase() || user.username?.charAt(0)?.toUpperCase() || 'U';
   };
 
   const getFullName = () => {
-    return `${userInfo.firstName || ''} ${userInfo.lastName || ''}`.trim() || 'Utilisateur';
+    if (!user) return 'Utilisateur';
+    return `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.username || 'Utilisateur';
+  };
+
+  const getRoleDisplay = () => {
+    if (!user) return '';
+    return user.role === 'Admin' ? 'Administrateur' : 'Client';
   };
 
   return (
@@ -143,16 +143,27 @@ function UserProfileMenu() {
                 {getFullName()}
               </MDTypography>
               <MDTypography variant="caption" color="text" display="block">
-                {userInfo.email}
+                {user?.email || ''}
               </MDTypography>
               <MDTypography variant="caption" color="info" display="block">
-                {userInfo.role === 'ADMIN' ? 'Administrateur' : 'Utilisateur'}
+                {getRoleDisplay()}
               </MDTypography>
             </MDBox>
           </MDBox>
         </Box>
 
         {/* Options du menu */}
+        <MenuItem onClick={handleDashboard}>
+          <ListItemIcon>
+            <span className="material-icons" style={{ fontSize: 20 }}>dashboard</span>
+          </ListItemIcon>
+          <ListItemText>
+            <MDTypography variant="button">
+              {isAdmin ? 'Dashboard Admin' : 'Mon Espace'}
+            </MDTypography>
+          </ListItemText>
+        </MenuItem>
+
         <MenuItem onClick={handleProfile}>
           <ListItemIcon>
             <span className="material-icons" style={{ fontSize: 20 }}>person</span>
@@ -161,7 +172,7 @@ function UserProfileMenu() {
             <MDTypography variant="button">Modifier le profil</MDTypography>
           </ListItemText>
         </MenuItem>
-        
+
         <Divider />
         
         <MenuItem onClick={handleLogout}>

@@ -130,6 +130,21 @@ public class AuthenticationController {
         }
     }
 
+    @GetMapping("/me")
+    public ResponseEntity<Map<String, Object>> getCurrentUser(Authentication authentication) {
+        logger.info("Récupération des informations de l'utilisateur connecté via /me: {}", authentication.getName());
+        try {
+            Map<String, Object> userInfo = authService.getCurrentUserInfo(authentication.getName());
+            return ResponseEntity.ok(userInfo);
+        } catch (Exception e) {
+            logger.error("Erreur lors de la récupération des informations utilisateur via /me: {}", e.getMessage());
+            Map<String, Object> response = new HashMap<>();
+            response.put("status", "error");
+            response.put("message", "Erreur: " + e.getMessage());
+            return ResponseEntity.badRequest().body(response);
+        }
+    }
+
     @PutMapping("/update-profile")
     public ResponseEntity<Map<String, Object>> updateProfile(@RequestBody Map<String, String> profileData, Authentication authentication) {
         logger.info("🔄 Mise à jour du profil pour l'utilisateur: {}", authentication.getName());

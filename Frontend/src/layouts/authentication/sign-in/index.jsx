@@ -80,10 +80,35 @@ function Basic() {
         localStorage.setItem('accessToken', access_token);
         localStorage.setItem('refreshToken', refresh_token);
 
-        console.log('Connexion réussie, redirection vers le dashboard');
+        console.log('Connexion réussie, récupération des informations utilisateur...');
 
-        // Rediriger directement vers le dashboard
-        navigate('/dashboard');
+        // Récupérer les informations de l'utilisateur pour déterminer la redirection
+        try {
+          const userResponse = await axios.get('http://localhost:8090/api/auth/me', {
+            headers: {
+              'Authorization': `Bearer ${access_token}`
+            }
+          });
+
+          const userRole = userResponse.data.role;
+          console.log('Rôle utilisateur:', userRole);
+
+          // Rediriger selon le rôle
+          if (userRole === 'Admin') {
+            console.log('Redirection vers le dashboard admin');
+            navigate('/dashboard');
+          } else if (userRole === 'Client') {
+            console.log('Redirection vers l\'accueil client');
+            navigate('/client/accueil');
+          } else {
+            console.log('Rôle non reconnu, redirection par défaut');
+            navigate('/');
+          }
+        } catch (userErr) {
+          console.error('Erreur lors de la récupération des informations utilisateur:', userErr);
+          // En cas d'erreur, redirection par défaut
+          navigate('/');
+        }
       } else {
         setError(message || "Token non reçu du serveur");
       }

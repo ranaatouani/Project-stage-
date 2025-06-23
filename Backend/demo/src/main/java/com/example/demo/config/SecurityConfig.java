@@ -60,6 +60,7 @@ public class SecurityConfig {
                                 // Endpoints protégés pour les utilisateurs authentifiés
                                 .requestMatchers(
                                         "/api/auth/user-info",
+                                        "/api/auth/me",
                                         "/api/auth/update-profile"
                                 )
                                 .authenticated()

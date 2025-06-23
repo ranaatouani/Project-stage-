@@ -131,12 +131,12 @@ class AuthService {
     // Supprimer les tokens du localStorage
     localStorage.removeItem('accessToken');
     localStorage.removeItem('refreshToken');
-    
+
     // Optionnel: Appeler l'endpoint de déconnexion côté serveur
     // pour invalider le token côté serveur aussi
-    
-    // Rediriger vers la page de connexion
-    window.location.href = '/auth/sign-in';
+
+    // Rediriger vers la page d'accueil
+    window.location.href = '/';
   }
 
   // Vérifier si l'utilisateur est admin
