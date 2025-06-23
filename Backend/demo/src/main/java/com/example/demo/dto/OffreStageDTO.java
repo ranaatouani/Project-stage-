@@ -7,10 +7,10 @@ public class OffreStageDTO {
     private String titre;
     private String description;
     private String localisation;
-    private Integer dureeEnSemaines;
+    private Integer dureeSemaines;
     private String entreprise;
     private String contactEmail;
-    private Double salaire;
+    private Double salaireMensuel;
     private boolean publie;
     private LocalDateTime dateCreation;
     private LocalDateTime datePublication;
@@ -53,12 +53,12 @@ public class OffreStageDTO {
         this.localisation = localisation;
     }
 
-    public Integer getDureeEnSemaines() {
-        return dureeEnSemaines;
+    public Integer getDureeSemaines() {
+        return dureeSemaines;
     }
 
-    public void setDureeEnSemaines(Integer dureeEnSemaines) {
-        this.dureeEnSemaines = dureeEnSemaines;
+    public void setDureeSemaines(Integer dureeSemaines) {
+        this.dureeSemaines = dureeSemaines;
     }
 
     public String getEntreprise() {
@@ -79,12 +79,12 @@ public class OffreStageDTO {
 
 
 
-    public Double getSalaire() {
-        return salaire;
+    public Double getSalaireMensuel() {
+        return salaireMensuel;
     }
 
-    public void setSalaire(Double salaire) {
-        this.salaire = salaire;
+    public void setSalaireMensuel(Double salaireMensuel) {
+        this.salaireMensuel = salaireMensuel;
     }
 
     public boolean isPublie() {

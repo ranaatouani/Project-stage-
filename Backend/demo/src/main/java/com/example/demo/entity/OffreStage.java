@@ -65,7 +65,7 @@ public class OffreStage {
     // Relation avec ProjetStage (One-to-One)
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "projet_stage_id", referencedColumnName = "id")
-    @JsonManagedReference
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private ProjetStage projetStage;
 
     // Relation avec User (créateur de l'offre - Admin)

@@ -19,10 +19,10 @@ public class OffreStageMapper {
         dto.setTitre(offreStage.getTitre());
         dto.setDescription(offreStage.getDescription());
         dto.setLocalisation(offreStage.getLocalisation());
-        dto.setDureeEnSemaines(offreStage.getDureeSemaines());
+        dto.setDureeSemaines(offreStage.getDureeSemaines());
         dto.setEntreprise(offreStage.getEntreprise());
         dto.setContactEmail(offreStage.getContactEmail());
-        dto.setSalaire(offreStage.getSalaireMensuel());
+        dto.setSalaireMensuel(offreStage.getSalaireMensuel());
         dto.setPublie(offreStage.isEstPublie());
         dto.setDateCreation(offreStage.getDateCreation());
         dto.setDatePublication(offreStage.getDatePublication());
@@ -66,10 +66,10 @@ public class OffreStageMapper {
         offreStage.setTitre(dto.getTitre());
         offreStage.setDescription(dto.getDescription());
         offreStage.setLocalisation(dto.getLocalisation());
-        offreStage.setDureeSemaines(dto.getDureeEnSemaines());
+        offreStage.setDureeSemaines(dto.getDureeSemaines());
         offreStage.setEntreprise(dto.getEntreprise());
         offreStage.setContactEmail(dto.getContactEmail());
-        offreStage.setSalaireMensuel(dto.getSalaire());
+        offreStage.setSalaireMensuel(dto.getSalaireMensuel());
         offreStage.setEstPublie(dto.isPublie());
         offreStage.setDateCreation(dto.getDateCreation());
         offreStage.setDatePublication(dto.getDatePublication());

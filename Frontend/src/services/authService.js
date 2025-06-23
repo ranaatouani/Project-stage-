@@ -1,12 +1,12 @@
 // Service d'authentification centralisé
 class AuthService {
   constructor() {
-    this.baseURL = 'http://localhost:8080/api/auth';
+    this.baseURL = 'http://localhost:8090/api/auth';
   }
 
   // Récupérer le token depuis localStorage
   getToken() {
-    return localStorage.getItem('token');
+    return localStorage.getItem('accessToken');
   }
 
   // Vérifier si l'utilisateur est connecté
@@ -59,9 +59,12 @@ class AuthService {
 
       const data = await response.json();
       
-      // Stocker le token
+      // Stocker les tokens
       if (data.access_token) {
-        localStorage.setItem('token', data.access_token);
+        localStorage.setItem('accessToken', data.access_token);
+      }
+      if (data.refresh_token) {
+        localStorage.setItem('refreshToken', data.refresh_token);
       }
 
       return data;
@@ -125,8 +128,9 @@ class AuthService {
 
   // Déconnexion
   logout() {
-    // Supprimer le token du localStorage
-    localStorage.removeItem('token');
+    // Supprimer les tokens du localStorage
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
     
     // Optionnel: Appeler l'endpoint de déconnexion côté serveur
     // pour invalider le token côté serveur aussi
