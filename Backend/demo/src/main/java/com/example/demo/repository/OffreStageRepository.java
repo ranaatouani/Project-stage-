@@ -83,4 +83,10 @@ public interface OffreStageRepository extends JpaRepository<OffreStage, Long> {
     // Trouver les offres publiées récentes
     @Query("SELECT o FROM OffreStage o WHERE o.estPublie = true AND o.dateCreation >= :dateLimit ORDER BY o.dateCreation DESC")
     List<OffreStage> findRecentOffresPubliees(@Param("dateLimit") LocalDateTime dateLimit);
+
+    // Méthodes pour les statistiques
+    long countByDateCreationAfter(LocalDateTime date);
+    long countByDatePublicationAfter(LocalDateTime date);
+    long countByProjetStageIsNotNull();
+    long countByProjetStageIsNull();
 }

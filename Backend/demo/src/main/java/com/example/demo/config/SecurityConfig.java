@@ -75,7 +75,8 @@ public class SecurityConfig {
                                 // Endpoints pour les admins seulement
                                 .requestMatchers(
                                         "/api/offres/**",
-                                        "/api/projets/**"
+                                        "/api/projets/**",
+                                        "/api/statistiques/**"
                                 ).hasAuthority("Admin")
                                 .requestMatchers("/admin_only/**").hasAuthority("ADMIN")
                                 .anyRequest()
