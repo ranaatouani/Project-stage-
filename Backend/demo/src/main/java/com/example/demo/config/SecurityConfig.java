@@ -61,9 +61,15 @@ public class SecurityConfig {
                                 .requestMatchers(
                                         "/api/auth/user-info",
                                         "/api/auth/me",
-                                        "/api/auth/update-profile"
+                                        "/api/auth/update-profile",
+                                        "/api/candidatures/mes-candidatures"
                                 )
                                 .authenticated()
+                                // Endpoints publics pour les candidatures
+                                .requestMatchers(
+                                        "/api/candidatures/soumettre"
+                                )
+                                .permitAll()
                                 // Endpoints publics pour consulter les offres publiées
                                 .requestMatchers(
                                         "/api/offres/publiees",
@@ -77,7 +83,12 @@ public class SecurityConfig {
                                 .requestMatchers(
                                         "/api/offres/**",
                                         "/api/projets/**",
-                                        "/api/statistiques/**"
+                                        "/api/statistiques/**",
+                                        "/api/candidatures/toutes",
+                                        "/api/candidatures/offre/**",
+                                        "/api/candidatures/*/statut",
+                                        "/api/candidatures/recherche",
+                                        "/api/candidatures/statistiques"
                                 ).hasAuthority("Admin")
                                 .requestMatchers("/admin_only/**").hasAuthority("ADMIN")
                                 .anyRequest()

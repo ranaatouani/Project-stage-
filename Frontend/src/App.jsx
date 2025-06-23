@@ -40,6 +40,7 @@ import OffresStage from "layouts/offres-stage";
 import OffresPubliques from "layouts/offres-publiques";
 import AdminProfile from "layouts/admin-profile";
 import AccueilClient from "layouts/accueil-client";
+import CandidaturesAdmin from "layouts/candidatures-admin";
 import ProtectedRoute from "components/ProtectedRoute";
 
 // Routes pour la sidebar
@@ -175,6 +176,14 @@ function App() {
         element={
           <ProtectedRoute requireAdmin={true}>
             <AdminProfile />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/candidatures"
+        element={
+          <ProtectedRoute requireAdmin={true}>
+            <CandidaturesAdmin />
           </ProtectedRoute>
         }
       />

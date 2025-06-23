@@ -52,6 +52,7 @@ import {
 
 // Services
 import { statistiquesService } from "services/statistiquesService";
+import { candidatureService } from "services/candidatureService";
 
 // Dashboard components
 import OffresRecentes from "layouts/dashboard/components/OffresRecentes";
@@ -63,6 +64,7 @@ function Dashboard() {
 
   // États pour les statistiques
   const [stats, setStats] = useState(null);
+  const [candidatureStats, setCandidatureStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -74,8 +76,12 @@ function Dashboard() {
   const loadStatistiques = async () => {
     try {
       setLoading(true);
-      const data = await statistiquesService.getStatistiquesDashboard();
-      setStats(data);
+      const [statsData, candidatureStatsData] = await Promise.all([
+        statistiquesService.getStatistiquesDashboard(),
+        candidatureService.getStatistiquesCandidatures()
+      ]);
+      setStats(statsData);
+      setCandidatureStats(candidatureStatsData);
       setError('');
     } catch (err) {
       console.error('Erreur lors du chargement des statistiques:', err);
@@ -222,7 +228,7 @@ function Dashboard() {
         <MDBox>
           <Grid container spacing={3}>
             {/* Carte de gestion des offres de stage */}
-            <Grid item xs={12} md={6} lg={4}>
+            <Grid item xs={12} md={6} lg={3}>
               <Card sx={{ height: '100%' }}>
                 <CardContent>
                   <Box display="flex" alignItems="center" mb={2}>
@@ -263,7 +269,7 @@ function Dashboard() {
             </Grid>
 
             {/* Carte des utilisateurs */}
-            <Grid item xs={12} md={6} lg={4}>
+            <Grid item xs={12} md={6} lg={3}>
               <Card sx={{ height: '100%' }}>
                 <CardContent>
                   <Box display="flex" alignItems="center" mb={2}>
@@ -303,8 +309,49 @@ function Dashboard() {
               </Card>
             </Grid>
 
+            {/* Carte des candidatures */}
+            <Grid item xs={12} md={6} lg={3}>
+              <Card sx={{ height: '100%' }}>
+                <CardContent>
+                  <Box display="flex" alignItems="center" mb={2}>
+                    <PeopleIcon sx={{ fontSize: 40, color: 'info.main', mr: 2 }} />
+                    <Box>
+                      <MDTypography variant="h6" fontWeight="medium">
+                        Candidatures
+                      </MDTypography>
+                      <Typography variant="body2" color="text.secondary">
+                        {candidatureStats?.total || 0} candidatures • {candidatureStats?.enAttente || 0} en attente
+                      </Typography>
+                    </Box>
+                  </Box>
+
+                  <Typography variant="body2" color="text.secondary" paragraph>
+                    Gérez les candidatures reçues et suivez leur statut.
+                  </Typography>
+
+                  <Box display="flex" gap={1} mt={2}>
+                    <MDButton
+                      variant="gradient"
+                      color="info"
+                      size="small"
+                      onClick={() => navigate('/admin/candidatures')}
+                    >
+                      Voir candidatures
+                    </MDButton>
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      onClick={loadStatistiques}
+                    >
+                      Actualiser
+                    </Button>
+                  </Box>
+                </CardContent>
+              </Card>
+            </Grid>
+
             {/* Carte des projets */}
-            <Grid item xs={12} md={6} lg={4}>
+            <Grid item xs={12} md={6} lg={3}>
               <Card sx={{ height: '100%' }}>
                 <CardContent>
                   <Box display="flex" alignItems="center" mb={2}>

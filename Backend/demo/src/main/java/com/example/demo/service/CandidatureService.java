@@ -1,0 +1,183 @@
+package com.example.demo.service;
+
+import com.example.demo.entity.Candidature;
+import com.example.demo.entity.OffreStage;
+import com.example.demo.entity.StatutCandidature;
+import com.example.demo.entity.User;
+import com.example.demo.repository.CandidatureRepository;
+import com.example.demo.repository.OffreStageRepository;
+import com.example.demo.repository.UserRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+@Service
+@Transactional
+public class CandidatureService {
+
+    private static final Logger logger = LoggerFactory.getLogger(CandidatureService.class);
+    private static final String UPLOAD_DIR = "uploads/cv/";
+
+    private final CandidatureRepository candidatureRepository;
+    private final OffreStageRepository offreStageRepository;
+    private final UserRepository userRepository;
+
+    public CandidatureService(CandidatureRepository candidatureRepository,
+                             OffreStageRepository offreStageRepository,
+                             UserRepository userRepository) {
+        this.candidatureRepository = candidatureRepository;
+        this.offreStageRepository = offreStageRepository;
+        this.userRepository = userRepository;
+        
+        // Créer le dossier d'upload s'il n'existe pas
+        try {
+            Files.createDirectories(Paths.get(UPLOAD_DIR));
+        } catch (IOException e) {
+            logger.error("Erreur lors de la création du dossier d'upload: {}", e.getMessage());
+        }
+    }
+
+    public Candidature soumettreCandidature(Long offreStageId, String nom, String prenom, 
+                                          String email, String telephone, String motivation,
+                                          MultipartFile cvFile, String username) {
+        logger.info("Soumission d'une candidature pour l'offre {} par {}", offreStageId, email);
+
+        // Vérifier que l'offre existe
+        OffreStage offreStage = offreStageRepository.findById(offreStageId)
+                .orElseThrow(() -> new RuntimeException("Offre de stage non trouvée"));
+
+        // Vérifier que l'offre est publiée
+        if (!offreStage.isEstPublie()) {
+            throw new RuntimeException("Cette offre n'est plus disponible");
+        }
+
+        // Récupérer l'utilisateur si connecté
+        User candidat = null;
+        if (username != null) {
+            candidat = userRepository.findByUsername(username).orElse(null);
+        }
+
+        // Vérifier si l'utilisateur n'a pas déjà candidaté
+        if (candidat != null) {
+            Optional<Candidature> existingCandidature = candidatureRepository
+                    .findByOffreStageAndCandidat(offreStage, candidat);
+            if (existingCandidature.isPresent()) {
+                throw new RuntimeException("Vous avez déjà candidaté pour cette offre");
+            }
+        } else {
+            // Vérifier par email si pas connecté
+            Optional<Candidature> existingCandidature = candidatureRepository
+                    .findByOffreStageAndEmail(offreStage, email);
+            if (existingCandidature.isPresent()) {
+                throw new RuntimeException("Une candidature avec cet email existe déjà pour cette offre");
+            }
+        }
+
+        // Créer la candidature
+        Candidature candidature = new Candidature(nom, prenom, email, telephone, motivation, offreStage, candidat);
+
+        // Gérer l'upload du CV
+        if (cvFile != null && !cvFile.isEmpty()) {
+            try {
+                String cvPath = saveCV(cvFile, candidature);
+                candidature.setCvPath(cvPath);
+                candidature.setCvFilename(cvFile.getOriginalFilename());
+            } catch (IOException e) {
+                logger.error("Erreur lors de l'upload du CV: {}", e.getMessage());
+                throw new RuntimeException("Erreur lors de l'upload du CV: " + e.getMessage());
+            }
+        }
+
+        candidature = candidatureRepository.save(candidature);
+        logger.info("Candidature créée avec succès: {}", candidature.getId());
+
+        return candidature;
+    }
+
+    private String saveCV(MultipartFile file, Candidature candidature) throws IOException {
+        // Générer un nom de fichier unique
+        String originalFilename = file.getOriginalFilename();
+        String extension = "";
+        if (originalFilename != null && originalFilename.contains(".")) {
+            extension = originalFilename.substring(originalFilename.lastIndexOf("."));
+        }
+        
+        String filename = UUID.randomUUID().toString() + extension;
+        Path filePath = Paths.get(UPLOAD_DIR + filename);
+
+        // Copier le fichier
+        Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+
+        return filePath.toString();
+    }
+
+    public List<Candidature> getCandidaturesPourOffre(Long offreStageId) {
+        OffreStage offreStage = offreStageRepository.findById(offreStageId)
+                .orElseThrow(() -> new RuntimeException("Offre non trouvée"));
+        return candidatureRepository.findByOffreStageOrderByDateCandidatureDesc(offreStage);
+    }
+
+    public List<Candidature> getCandidaturesUtilisateur(String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
+        return candidatureRepository.findByCandidat(user);
+    }
+
+    public List<Candidature> getToutesCandidatures() {
+        return candidatureRepository.findAllByOrderByDateCandidatureDesc();
+    }
+
+    public Candidature getCandidatureById(Long id) {
+        return candidatureRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Candidature non trouvée"));
+    }
+
+    public Candidature changerStatutCandidature(Long candidatureId, StatutCandidature nouveauStatut) {
+        Candidature candidature = getCandidatureById(candidatureId);
+        candidature.setStatut(nouveauStatut);
+        return candidatureRepository.save(candidature);
+    }
+
+    public void supprimerCandidature(Long candidatureId) {
+        Candidature candidature = getCandidatureById(candidatureId);
+        
+        // Supprimer le fichier CV s'il existe
+        if (candidature.getCvPath() != null) {
+            try {
+                Files.deleteIfExists(Paths.get(candidature.getCvPath()));
+            } catch (IOException e) {
+                logger.warn("Impossible de supprimer le fichier CV: {}", e.getMessage());
+            }
+        }
+        
+        candidatureRepository.delete(candidature);
+    }
+
+    public long getNombreCandidaturesPourOffre(Long offreStageId) {
+        OffreStage offreStage = offreStageRepository.findById(offreStageId)
+                .orElseThrow(() -> new RuntimeException("Offre non trouvée"));
+        return candidatureRepository.countByOffreStage(offreStage);
+    }
+
+    public List<Candidature> getCandidaturesRecentes() {
+        LocalDateTime unMoisAgo = LocalDateTime.now().minus(30, ChronoUnit.DAYS);
+        return candidatureRepository.findRecentCandidatures(unMoisAgo);
+    }
+
+    public List<Candidature> rechercherCandidatures(String searchTerm) {
+        return candidatureRepository.searchCandidatures(searchTerm);
+    }
+}

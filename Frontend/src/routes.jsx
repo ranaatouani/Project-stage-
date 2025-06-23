@@ -52,6 +52,13 @@ const routes = [
   },
   {
     type: "collapse",
+    name: "Candidatures",
+    key: "candidatures",
+    icon: <span className="material-icons" style={{ fontSize: 20 }}>people</span>,
+    route: "/admin/candidatures",
+  },
+  {
+    type: "collapse",
     name: "Tables",
     key: "tables",
     icon: <span className="material-icons" style={{ fontSize: 20 }}>table_view</span>,

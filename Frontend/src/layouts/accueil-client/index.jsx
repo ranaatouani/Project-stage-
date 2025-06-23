@@ -32,6 +32,11 @@ import Footer from "examples/Footer";
 
 // Services
 import { offreStageService } from "services/offreStageService";
+import { candidatureService } from "services/candidatureService";
+
+// Components
+import OffreDetailsModal from "components/OffreStage/OffreDetailsModal";
+import CandidatureModal from "components/OffreStage/CandidatureModal";
 
 function AccueilClient() {
   const navigate = useNavigate();
@@ -40,6 +45,11 @@ function AccueilClient() {
   const [error, setError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredOffres, setFilteredOffres] = useState([]);
+
+  // États pour les modals
+  const [selectedOffre, setSelectedOffre] = useState(null);
+  const [detailsModalOpen, setDetailsModalOpen] = useState(false);
+  const [candidatureModalOpen, setCandidatureModalOpen] = useState(false);
 
   useEffect(() => {
     loadOffresPubliees();
@@ -85,8 +95,32 @@ function AccueilClient() {
   };
 
   const handleVoirDetails = (offre) => {
-    // Naviguer vers une page de détails (à créer plus tard)
-    console.log('Voir détails de l\'offre:', offre);
+    setSelectedOffre(offre);
+    setDetailsModalOpen(true);
+  };
+
+  const handleCandidater = (offre) => {
+    setSelectedOffre(offre);
+    setCandidatureModalOpen(true);
+  };
+
+  const handleCloseDetailsModal = () => {
+    setDetailsModalOpen(false);
+    setSelectedOffre(null);
+  };
+
+  const handleCloseCandidatureModal = () => {
+    setCandidatureModalOpen(false);
+    setSelectedOffre(null);
+  };
+
+  const handleSubmitCandidature = async (formData) => {
+    try {
+      await candidatureService.soumettreCandidature(formData);
+      // La modal se fermera automatiquement après succès
+    } catch (error) {
+      throw new Error(error.response?.data?.message || 'Erreur lors de la soumission');
+    }
   };
 
   return (
@@ -263,7 +297,7 @@ function AccueilClient() {
                         color="success"
                         size="small"
                         sx={{ flex: 1 }}
-                        onClick={() => console.log('Candidater à:', offre.titre)}
+                        onClick={() => handleCandidater(offre)}
                       >
                         Candidater
                       </MDButton>
@@ -274,6 +308,21 @@ function AccueilClient() {
             ))}
           </Grid>
         )}
+
+        {/* Modals */}
+        <OffreDetailsModal
+          open={detailsModalOpen}
+          onClose={handleCloseDetailsModal}
+          offre={selectedOffre}
+          onCandidater={handleCandidater}
+        />
+
+        <CandidatureModal
+          open={candidatureModalOpen}
+          onClose={handleCloseCandidatureModal}
+          offre={selectedOffre}
+          onSubmit={handleSubmitCandidature}
+        />
       </MDBox>
       <Footer />
     </DashboardLayout>
