@@ -387,7 +387,10 @@ function CandidaturesAdmin() {
             <CancelIcon sx={{ mr: 1, color: 'error.main' }} />
             Refuser
           </MenuItem>
-          <MenuItem onClick={() => handleChangeStatut('ENTRETIEN')}>
+          <MenuItem onClick={() => {
+            alert('Programmation d\'entretien en cours...');
+            handleChangeStatut('ENTRETIEN');
+          }}>
             <ScheduleIcon sx={{ mr: 1, color: 'info.main' }} />
             Programmer entretien
           </MenuItem>

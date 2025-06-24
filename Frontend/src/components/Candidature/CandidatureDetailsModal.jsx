@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -11,7 +11,8 @@ import {
   Grid,
   IconButton,
   Paper,
-  Avatar
+  Avatar,
+  Alert
 } from '@mui/material';
 import {
   Close as CloseIcon,
@@ -23,15 +24,86 @@ import {
   GetApp as DownloadIcon,
   Description as FileIcon,
   Business as BusinessIcon,
-  LocationOn as LocationIcon
+  LocationOn as LocationIcon,
+  Schedule as ScheduleIcon
 } from '@mui/icons-material';
 
 import MDBox from 'components/MDBox';
 import MDButton from 'components/MDButton';
 import MDTypography from 'components/MDTypography';
 
+// Composants pour les entretiens
+// import ProgrammerEntretienModal from 'components/Entretien/ProgrammerEntretienModal';
+
+// Services
+// import { entretienService } from 'services/entretienService';
+
 function CandidatureDetailsModal({ open, onClose, candidature, onChangeStatut }) {
+  // const [entretienModalOpen, setEntretienModalOpen] = useState(false);
+  // const [entretienExistant, setEntretienExistant] = useState(null);
+  const [loading, setLoading] = useState(false);
+  // const [error, setError] = useState('');
+
   if (!candidature) return null;
+
+  // Temporairement désactivé pour éviter les erreurs
+  // useEffect(() => {
+  //   if (candidature && candidature.statut === 'ENTRETIEN' && candidature.id) {
+  //     loadEntretien();
+  //   }
+  // }, [candidature?.id, candidature?.statut]);
+
+  // const loadEntretien = async () => {
+  //   try {
+  //     const entretien = await entretienService.getEntretienByCandidature(candidature.id);
+  //     setEntretienExistant(entretien);
+  //   } catch (error) {
+  //     console.error('Erreur lors du chargement de l\'entretien:', error);
+  //     setEntretienExistant(null);
+  //   }
+  // };
+
+  const handleProgrammerEntretien = async () => {
+    console.log('handleProgrammerEntretien appelé');
+    alert('Bouton Programmer entretien cliqué !'); // Test simple
+
+    // Temporairement, on change juste le statut
+    if (onChangeStatut) {
+      try {
+        setLoading(true);
+        console.log('Changement de statut vers ENTRETIEN...');
+        await onChangeStatut('ENTRETIEN');
+        console.log('Statut changé avec succès');
+        // Le modal sera fermé automatiquement par handleChangeStatut dans candidatures-admin
+      } catch (error) {
+        console.error('Erreur lors du changement de statut:', error);
+        alert('Erreur: ' + error.message);
+      } finally {
+        setLoading(false);
+      }
+    } else {
+      console.log('onChangeStatut non défini');
+      alert('Erreur: onChangeStatut non défini');
+    }
+  };
+
+  // const handleSaveEntretien = async (entretienData) => {
+  //   setLoading(true);
+  //   setError('');
+  //   try {
+  //     await entretienService.programmerEntretien(entretienData);
+  //     await loadEntretien();
+  //     setEntretienModalOpen(false);
+  //     if (onChangeStatut) {
+  //       await onChangeStatut('ENTRETIEN');
+  //     }
+  //   } catch (error) {
+  //     console.error('Erreur lors de la programmation de l\'entretien:', error);
+  //     setError(error.response?.data?.error || error.message || 'Erreur lors de la programmation de l\'entretien');
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   const formatDate = (dateString) => {
     if (!dateString) return 'Non défini';
@@ -264,6 +336,40 @@ function CandidatureDetailsModal({ open, onClose, candidature, onChangeStatut })
             </MDBox>
           </Grid>
 
+          {/* Informations d'entretien */}
+          {candidature.statut === 'ENTRETIEN' && (
+            <Grid item xs={12}>
+              <Divider sx={{ my: 2 }} />
+              <MDTypography variant="h6" fontWeight="medium" gutterBottom>
+                📅 Entretien programmé
+              </MDTypography>
+              <Paper
+                variant="outlined"
+                sx={{
+                  p: 3,
+                  bgcolor: 'success.light',
+                  borderColor: 'success.main',
+                  borderWidth: 2
+                }}
+              >
+                <Box display="flex" alignItems="center" mb={2}>
+                  <CalendarIcon sx={{ mr: 1, color: 'success.main', fontSize: 24 }} />
+                  <Typography variant="h6" color="success.main" fontWeight="bold">
+                    Entretien en cours de programmation
+                  </Typography>
+                </Box>
+                <Typography variant="body1" sx={{ mb: 2 }}>
+                  ✅ Le statut de cette candidature a été mis à jour vers "ENTRETIEN".
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  L'administrateur va maintenant programmer les détails de l'entretien
+                  (date, heure, lieu, etc.) et le candidat recevra une notification avec
+                  toutes les informations nécessaires.
+                </Typography>
+              </Paper>
+            </Grid>
+          )}
+
           {/* CV */}
           <Grid item xs={12}>
             <Divider sx={{ my: 2 }} />
@@ -352,7 +458,7 @@ function CandidatureDetailsModal({ open, onClose, candidature, onChangeStatut })
         >
           Fermer
         </MDButton>
-        
+
         {candidature.statut === 'EN_ATTENTE' && (
           <>
             <MDButton
@@ -372,7 +478,7 @@ function CandidatureDetailsModal({ open, onClose, candidature, onChangeStatut })
             <MDButton
               variant="gradient"
               color="info"
-              onClick={() => onChangeStatut('ENTRETIEN')}
+              onClick={() => alert('BOUTON FONCTIONNE !')}
             >
               Programmer entretien
             </MDButton>
@@ -389,6 +495,14 @@ function CandidatureDetailsModal({ open, onClose, candidature, onChangeStatut })
           </MDButton>
         )}
       </DialogActions>
+
+      {/* Modal de programmation d'entretien - Temporairement désactivé */}
+      {/* <ProgrammerEntretienModal
+        open={entretienModalOpen}
+        onClose={() => setEntretienModalOpen(false)}
+        candidature={candidature}
+        onSave={handleSaveEntretien}
+      /> */}
     </Dialog>
   );
 }

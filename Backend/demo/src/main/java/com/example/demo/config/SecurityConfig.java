@@ -63,7 +63,9 @@ public class SecurityConfig {
                                         "/api/auth/me",
                                         "/api/auth/update-profile",
                                         "/api/candidatures/mes-candidatures",
-                                        "/api/notifications/**"
+                                        "/api/notifications/**",
+                                        "/api/entretiens/mes-entretiens",
+                                        "/api/entretiens/mes-entretiens/a-venir"
                                 )
                                 .authenticated()
                                 // Endpoints publics pour les candidatures
@@ -92,7 +94,12 @@ public class SecurityConfig {
                                         "/api/candidatures/statistiques",
                                         "/api/candidatures/*/cv",
                                         "/api/candidatures/debug/cv-files",
-                                        "/api/candidatures/debug/fix-cv-paths"
+                                        "/api/candidatures/debug/fix-cv-paths",
+                                        "/api/entretiens/programmer",
+                                        "/api/entretiens/*/",
+                                        "/api/entretiens/candidature/**",
+                                        "/api/entretiens/a-venir",
+                                        "/api/entretiens/aujourd-hui"
                                 ).hasAuthority("Admin")
                                 .requestMatchers("/admin_only/**").hasAuthority("ADMIN")
                                 .anyRequest()

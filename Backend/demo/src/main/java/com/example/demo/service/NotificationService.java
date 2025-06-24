@@ -62,11 +62,19 @@ public class NotificationService {
                 
             case EN_ATTENTE:
                 titre = "Candidature en cours d'examen";
-                message = String.format("Votre candidature pour l'offre \"%s\" est en cours d'examen.", 
+                message = String.format("Votre candidature pour l'offre \"%s\" est en cours d'examen.",
                                       candidature.getOffreStage().getTitre());
                 type = TypeNotification.CANDIDATURE_EN_ATTENTE;
                 break;
-                
+
+            case ENTRETIEN:
+                titre = "Entretien programmé";
+                message = String.format("Un entretien a été programmé pour votre candidature à l'offre \"%s\". " +
+                                      "Consultez vos entretiens pour plus de détails.",
+                                      candidature.getOffreStage().getTitre());
+                type = TypeNotification.CANDIDATURE_ACCEPTEE; // Temporairement, utiliser un type existant
+                break;
+
             default:
                 return; // Pas de notification pour les autres statuts
         }
@@ -121,7 +129,40 @@ public class NotificationService {
                        candidature.getCandidat().getUsername());
         }
     }
-    
+
+    // Créer une notification pour un entretien programmé
+    public void creerNotificationEntretienProgramme(Candidature candidature, Entretien entretien) {
+        if (candidature.getCandidat() == null) {
+            logger.warn("Impossible de créer une notification d'entretien : candidature sans utilisateur associé");
+            return;
+        }
+
+        String titre = "Entretien programmé";
+        String message = String.format("Un entretien a été programmé pour votre candidature à l'offre \"%s\".\n\n" +
+                                     "📅 Date : %s\n" +
+                                     "📍 Lieu : %s\n" +
+                                     "💼 Type : %s\n" +
+                                     "%s" +
+                                     "Consultez vos entretiens pour plus de détails.",
+                                     candidature.getOffreStage().getTitre(),
+                                     entretien.getDateEntretien().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy à HH:mm")),
+                                     entretien.getLieu(),
+                                     entretien.getTypeEntretien().getLibelle(),
+                                     entretien.getLienVisio() != null ? "🔗 Lien : " + entretien.getLienVisio() + "\n" : "");
+
+        Notification notification = new Notification(
+            candidature.getCandidat(),
+            candidature,
+            titre,
+            message,
+            TypeNotification.CANDIDATURE_ACCEPTEE // Temporairement, utiliser un type existant
+        );
+
+        notificationRepository.save(notification);
+        logger.info("Notification d'entretien créée pour l'utilisateur {}",
+                   candidature.getCandidat().getUsername());
+    }
+
     // Récupérer les notifications d'un utilisateur
     public List<Notification> getNotificationsUtilisateur(String emailOrUsername) {
         User user = userRepository.findByEmail(emailOrUsername)
