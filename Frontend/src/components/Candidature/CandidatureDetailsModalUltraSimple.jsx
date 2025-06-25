@@ -30,6 +30,9 @@ import MDBox from 'components/MDBox';
 import MDButton from 'components/MDButton';
 import MDTypography from 'components/MDTypography';
 
+// Services
+import { entretienService } from 'services/entretienService';
+
 function CandidatureDetailsModalUltraSimple({ open, onClose, candidature, onChangeStatut }) {
   const [loading, setLoading] = useState(false);
   const [showProgrammationForm, setShowProgrammationForm] = useState(false);
@@ -76,6 +79,18 @@ function CandidatureDetailsModalUltraSimple({ open, onClose, candidature, onChan
   };
 
   const handleProgrammerEntretien = () => {
+    // Initialiser la date avec demain à 10h00
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    tomorrow.setHours(10, 0, 0, 0);
+    const isoString = tomorrow.toISOString().slice(0, 16);
+
+    setEntretienData(prev => ({
+      ...prev,
+      dateEntretien: isoString,
+      lieu: candidature.offreStage?.entreprise || ''
+    }));
+
     setShowProgrammationForm(true);
   };
 
@@ -85,10 +100,27 @@ function CandidatureDetailsModalUltraSimple({ open, onClose, candidature, onChan
       return;
     }
 
+    if (entretienData.typeEntretien === 'VISIOCONFERENCE' && !entretienData.lienVisio.trim()) {
+      alert('Le lien de visioconférence est obligatoire');
+      return;
+    }
+
     setLoading(true);
     try {
-      // Simuler la sauvegarde des détails d'entretien
-      console.log('Détails entretien:', entretienData);
+      // Préparer les données pour l'API
+      const entretienPayload = {
+        candidatureId: candidature.id,
+        dateEntretien: entretienData.dateEntretien,
+        lieu: entretienData.lieu,
+        typeEntretien: entretienData.typeEntretien,
+        lienVisio: entretienData.lienVisio || null,
+        commentaires: entretienData.commentaires || null
+      };
+
+      console.log('Envoi des données d\'entretien:', entretienPayload);
+
+      // Sauvegarder l'entretien via le service
+      await entretienService.programmerEntretien(entretienPayload);
 
       // Changer le statut
       if (onChangeStatut) {
@@ -98,8 +130,11 @@ function CandidatureDetailsModalUltraSimple({ open, onClose, candidature, onChan
       // Fermer le formulaire
       setShowProgrammationForm(false);
 
+      console.log('Entretien programmé avec succès !');
+
     } catch (error) {
-      console.error('Erreur:', error);
+      console.error('Erreur lors de la programmation:', error);
+      alert('Erreur lors de la programmation de l\'entretien: ' + (error.response?.data?.error || error.message));
     } finally {
       setLoading(false);
     }
