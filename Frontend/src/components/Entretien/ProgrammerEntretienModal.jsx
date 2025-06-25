@@ -12,10 +12,7 @@ import {
   Grid,
   Alert
 } from '@mui/material';
-// import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
-// import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-// import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
-// import { fr } from 'date-fns/locale';
+// Utilisation d'un input datetime-local au lieu du DateTimePicker pour éviter les problèmes de compatibilité
 
 // Material Dashboard 2 React components
 import MDBox from 'components/MDBox';
@@ -30,6 +27,17 @@ function ProgrammerEntretienModal({ open, onClose, candidature, onSave }) {
     lienVisio: '',
     commentaires: ''
   });
+
+  // Initialiser la date avec demain à 10h00
+  React.useEffect(() => {
+    if (open && !formData.dateEntretien) {
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      tomorrow.setHours(10, 0, 0, 0);
+      const isoString = tomorrow.toISOString().slice(0, 16); // Format YYYY-MM-DDTHH:MM
+      setFormData(prev => ({ ...prev, dateEntretien: isoString }));
+    }
+  }, [open]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -43,6 +51,14 @@ function ProgrammerEntretienModal({ open, onClose, candidature, onSave }) {
   const handleSubmit = async () => {
     if (!formData.dateEntretien) {
       setError('La date et l\'heure sont obligatoires');
+      return;
+    }
+
+    // Vérifier que la date est dans le futur
+    const selectedDate = new Date(formData.dateEntretien);
+    const now = new Date();
+    if (selectedDate <= now) {
+      setError('La date de l\'entretien doit être dans le futur');
       return;
     }
 

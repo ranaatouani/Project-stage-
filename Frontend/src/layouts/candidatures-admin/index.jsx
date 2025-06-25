@@ -49,7 +49,7 @@ import Footer from "examples/Footer";
 import { candidatureService } from "services/candidatureService";
 
 // Components
-import CandidatureDetailsModal from "components/Candidature/CandidatureDetailsModal";
+import CandidatureDetailsModal from "components/Candidature/CandidatureDetailsModalUltraSimple";
 
 function CandidaturesAdmin() {
   const navigate = useNavigate();
@@ -387,10 +387,7 @@ function CandidaturesAdmin() {
             <CancelIcon sx={{ mr: 1, color: 'error.main' }} />
             Refuser
           </MenuItem>
-          <MenuItem onClick={() => {
-            alert('Programmation d\'entretien en cours...');
-            handleChangeStatut('ENTRETIEN');
-          }}>
+          <MenuItem onClick={() => handleChangeStatut('ENTRETIEN')}>
             <ScheduleIcon sx={{ mr: 1, color: 'info.main' }} />
             Programmer entretien
           </MenuItem>

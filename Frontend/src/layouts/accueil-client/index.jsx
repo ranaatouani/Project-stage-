@@ -40,7 +40,7 @@ import { candidatureService } from "services/candidatureService";
 import OffreDetailsModal from "components/OffreStage/OffreDetailsModal";
 import CandidatureModal from "components/OffreStage/CandidatureModal";
 import MesCandidatures from "components/Candidatures/MesCandidatures";
-// import CalendrierEntretiens from "components/Entretien/CalendrierEntretiens";
+import CalendrierEntretiens from "components/Entretien/CalendrierEntretiens";
 
 function AccueilClient() {
   const navigate = useNavigate();
@@ -151,7 +151,7 @@ function AccueilClient() {
           <Tabs value={currentTab} onChange={handleTabChange} aria-label="client tabs">
             <Tab label="Offres disponibles" />
             <Tab label="Mes candidatures" />
-            {/* <Tab label="Mes entretiens" /> */}
+            <Tab label="Mes entretiens" />
           </Tabs>
         </MDBox>
 
@@ -335,9 +335,9 @@ function AccueilClient() {
           <MesCandidatures />
         )}
 
-        {/* {currentTab === 2 && (
+        {currentTab === 2 && (
           <CalendrierEntretiens />
-        )} */}
+        )}
 
         {/* Modals */}
         <OffreDetailsModal

@@ -72,7 +72,7 @@ public class NotificationService {
                 message = String.format("Un entretien a été programmé pour votre candidature à l'offre \"%s\". " +
                                       "Consultez vos entretiens pour plus de détails.",
                                       candidature.getOffreStage().getTitre());
-                type = TypeNotification.CANDIDATURE_ACCEPTEE; // Temporairement, utiliser un type existant
+                type = TypeNotification.ENTRETIEN_PROGRAMME;
                 break;
 
             default:
@@ -155,7 +155,7 @@ public class NotificationService {
             candidature,
             titre,
             message,
-            TypeNotification.CANDIDATURE_ACCEPTEE // Temporairement, utiliser un type existant
+            TypeNotification.ENTRETIEN_PROGRAMME
         );
 
         notificationRepository.save(notification);

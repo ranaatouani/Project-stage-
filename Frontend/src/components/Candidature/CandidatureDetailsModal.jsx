@@ -39,51 +39,20 @@ import MDTypography from 'components/MDTypography';
 // import { entretienService } from 'services/entretienService';
 
 function CandidatureDetailsModal({ open, onClose, candidature, onChangeStatut }) {
-  // const [entretienModalOpen, setEntretienModalOpen] = useState(false);
-  // const [entretienExistant, setEntretienExistant] = useState(null);
   const [loading, setLoading] = useState(false);
-  // const [error, setError] = useState('');
 
   if (!candidature) return null;
 
-  // Temporairement désactivé pour éviter les erreurs
-  // useEffect(() => {
-  //   if (candidature && candidature.statut === 'ENTRETIEN' && candidature.id) {
-  //     loadEntretien();
-  //   }
-  // }, [candidature?.id, candidature?.statut]);
-
-  // const loadEntretien = async () => {
-  //   try {
-  //     const entretien = await entretienService.getEntretienByCandidature(candidature.id);
-  //     setEntretienExistant(entretien);
-  //   } catch (error) {
-  //     console.error('Erreur lors du chargement de l\'entretien:', error);
-  //     setEntretienExistant(null);
-  //   }
-  // };
-
   const handleProgrammerEntretien = async () => {
-    console.log('handleProgrammerEntretien appelé');
-    alert('Bouton Programmer entretien cliqué !'); // Test simple
-
-    // Temporairement, on change juste le statut
     if (onChangeStatut) {
       try {
         setLoading(true);
-        console.log('Changement de statut vers ENTRETIEN...');
         await onChangeStatut('ENTRETIEN');
-        console.log('Statut changé avec succès');
-        // Le modal sera fermé automatiquement par handleChangeStatut dans candidatures-admin
       } catch (error) {
-        console.error('Erreur lors du changement de statut:', error);
-        alert('Erreur: ' + error.message);
+        console.error('Erreur:', error);
       } finally {
         setLoading(false);
       }
-    } else {
-      console.log('onChangeStatut non défini');
-      alert('Erreur: onChangeStatut non défini');
     }
   };
 
@@ -355,16 +324,14 @@ function CandidatureDetailsModal({ open, onClose, candidature, onChangeStatut })
                 <Box display="flex" alignItems="center" mb={2}>
                   <CalendarIcon sx={{ mr: 1, color: 'success.main', fontSize: 24 }} />
                   <Typography variant="h6" color="success.main" fontWeight="bold">
-                    Entretien en cours de programmation
+                    Entretien programmé
                   </Typography>
                 </Box>
                 <Typography variant="body1" sx={{ mb: 2 }}>
-                  ✅ Le statut de cette candidature a été mis à jour vers "ENTRETIEN".
+                  ✅ Un entretien a été programmé pour cette candidature.
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  L'administrateur va maintenant programmer les détails de l'entretien
-                  (date, heure, lieu, etc.) et le candidat recevra une notification avec
-                  toutes les informations nécessaires.
+                  Le candidat a reçu une notification avec les détails de l'entretien.
                 </Typography>
               </Paper>
             </Grid>
@@ -478,9 +445,10 @@ function CandidatureDetailsModal({ open, onClose, candidature, onChangeStatut })
             <MDButton
               variant="gradient"
               color="info"
-              onClick={() => alert('BOUTON FONCTIONNE !')}
+              onClick={handleProgrammerEntretien}
+              disabled={loading}
             >
-              Programmer entretien
+              {loading ? 'Programmation...' : 'Programmer entretien'}
             </MDButton>
           </>
         )}
