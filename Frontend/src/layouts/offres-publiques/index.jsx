@@ -649,79 +649,19 @@ function OffresPubliques() {
                 Liens Rapides
               </Typography>
               <Box display="flex" flexDirection="column" gap={1}>
-                <Link
-                  href="#"
-                  sx={{
-                    color: 'rgba(255,255,255,0.9)',
-                    textDecoration: 'none',
-                    '&:hover': {
-                      color: 'white',
-                      textDecoration: 'underline',
-                      transform: 'translateX(5px)',
-                      transition: 'all 0.3s ease'
-                    }
-                  }}
-                >
+                <Link href="#" color="rgba(255,255,255,0.9)" underline="hover">
                   Accueil
                 </Link>
-                <Link
-                  href="#"
-                  sx={{
-                    color: 'rgba(255,255,255,0.9)',
-                    textDecoration: 'none',
-                    '&:hover': {
-                      color: 'white',
-                      textDecoration: 'underline',
-                      transform: 'translateX(5px)',
-                      transition: 'all 0.3s ease'
-                    }
-                  }}
-                >
+                <Link href="#" color="rgba(255,255,255,0.9)" underline="hover">
                   Offres de Stage
                 </Link>
-                <Link
-                  href="#"
-                  sx={{
-                    color: 'rgba(255,255,255,0.9)',
-                    textDecoration: 'none',
-                    '&:hover': {
-                      color: 'white',
-                      textDecoration: 'underline',
-                      transform: 'translateX(5px)',
-                      transition: 'all 0.3s ease'
-                    }
-                  }}
-                >
+                <Link href="#" color="rgba(255,255,255,0.9)" underline="hover">
                   À propos de nous
                 </Link>
-                <Link
-                  href="#"
-                  sx={{
-                    color: 'rgba(255,255,255,0.9)',
-                    textDecoration: 'none',
-                    '&:hover': {
-                      color: 'white',
-                      textDecoration: 'underline',
-                      transform: 'translateX(5px)',
-                      transition: 'all 0.3s ease'
-                    }
-                  }}
-                >
+                <Link href="#" color="rgba(255,255,255,0.9)" underline="hover">
                   Comment ça marche
                 </Link>
-                <Link
-                  href="/auth/sign-in"
-                  sx={{
-                    color: 'rgba(255,255,255,0.9)',
-                    textDecoration: 'none',
-                    '&:hover': {
-                      color: 'white',
-                      textDecoration: 'underline',
-                      transform: 'translateX(5px)',
-                      transition: 'all 0.3s ease'
-                    }
-                  }}
-                >
+                <Link href="/auth/sign-in" color="rgba(255,255,255,0.9)" underline="hover">
                   Espace Admin
                 </Link>
               </Box>
@@ -761,32 +701,10 @@ function OffresPubliques() {
           <Box textAlign="center">
             <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.8)' }}>
               © 2024 StageConnect. Tous droits réservés. |
-              <Link
-                href="#"
-                sx={{
-                  ml: 1,
-                  color: 'rgba(255,255,255,0.9)',
-                  textDecoration: 'none',
-                  '&:hover': {
-                    color: 'white',
-                    textDecoration: 'underline'
-                  }
-                }}
-              >
+              <Link href="#" color="rgba(255,255,255,0.9)" underline="hover" sx={{ ml: 1 }}>
                 Politique de confidentialité
               </Link> |
-              <Link
-                href="#"
-                sx={{
-                  ml: 1,
-                  color: 'rgba(255,255,255,0.9)',
-                  textDecoration: 'none',
-                  '&:hover': {
-                    color: 'white',
-                    textDecoration: 'underline'
-                  }
-                }}
-              >
+              <Link href="#" color="rgba(255,255,255,0.9)" underline="hover" sx={{ ml: 1 }}>
                 Conditions d'utilisation
               </Link>
             </Typography>

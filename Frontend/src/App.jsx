@@ -40,7 +40,6 @@ import OffresStage from "layouts/offres-stage";
 import OffresPubliques from "layouts/offres-publiques";
 import AdminProfile from "layouts/admin-profile";
 import AccueilClient from "layouts/accueil-client";
-import AccueilPublic from "layouts/accueil-public";
 import CandidaturesAdmin from "layouts/candidatures-admin";
 import StagesAdmin from "layouts/stages-admin";
 import ProtectedRoute from "components/ProtectedRoute";
