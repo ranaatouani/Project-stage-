@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -38,6 +39,10 @@ public class CandidatureService {
 
     @Autowired
     private NotificationService notificationService;
+
+    @Autowired
+    @Lazy
+    private StageService stageService;
 
     public CandidatureService(CandidatureRepository candidatureRepository,
                              OffreStageRepository offreStageRepository,
@@ -194,9 +199,16 @@ public class CandidatureService {
         if (ancienStatut != nouveauStatut) {
             try {
                 notificationService.creerNotificationChangementStatut(candidature, ancienStatut);
+
+                // Si la candidature est acceptée, créer automatiquement un stage
+                if (nouveauStatut == StatutCandidature.ACCEPTEE) {
+                    logger.info("Candidature acceptée, création automatique du stage pour candidature {}", candidatureId);
+                    stageService.creerStageDepuisCandidature(candidatureId);
+                }
+
             } catch (Exception e) {
-                logger.error("Erreur lors de la création de la notification: {}", e.getMessage());
-                // Ne pas faire échouer le changement de statut si la notification échoue
+                logger.error("Erreur lors de la création de la notification ou du stage: {}", e.getMessage());
+                // Ne pas faire échouer le changement de statut si la notification/stage échoue
             }
         }
 

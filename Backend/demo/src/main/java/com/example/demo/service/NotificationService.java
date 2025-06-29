@@ -163,6 +163,69 @@ public class NotificationService {
                    candidature.getCandidat().getUsername());
     }
 
+    /**
+     * Envoyer une notification liée à un stage
+     */
+    public void envoyerNotificationStage(Stage stage, String typeNotification) {
+        String titre;
+        String message;
+
+        switch (typeNotification) {
+            case "STAGE_COMMENCE":
+                titre = "🎉 Félicitations ! Votre stage commence";
+                message = String.format("Félicitations ! Votre candidature pour l'offre \"%s\" chez %s a été acceptée.\n\n" +
+                                      "Votre stage commence le %s et se termine le %s.\n\n" +
+                                      "📋 Détails du stage :\n" +
+                                      "• Entreprise : %s\n" +
+                                      "• Poste : %s\n" +
+                                      "• Durée : %s\n\n" +
+                                      "Bonne chance pour votre stage !",
+                                      stage.getOffreStage().getTitre(),
+                                      stage.getOffreStage().getEntreprise(),
+                                      stage.getDateDebut().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy")),
+                                      stage.getDateFin().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy")),
+                                      stage.getOffreStage().getEntreprise(),
+                                      stage.getOffreStage().getTitre(),
+                                      stage.getOffreStage().getDureeSemaines() + " semaines");
+                break;
+
+            case "STAGE_TERMINE":
+                titre = "✅ Stage terminé";
+                message = String.format("Votre stage \"%s\" chez %s est maintenant terminé.\n\n" +
+                                      "Nous espérons que cette expérience a été enrichissante pour vous !",
+                                      stage.getOffreStage().getTitre(),
+                                      stage.getOffreStage().getEntreprise());
+                break;
+
+            case "STAGE_ANNULE":
+                titre = "❌ Stage annulé";
+                message = String.format("Nous regrettons de vous informer que votre stage \"%s\" chez %s a été annulé.\n\n" +
+                                      "%s",
+                                      stage.getOffreStage().getTitre(),
+                                      stage.getOffreStage().getEntreprise(),
+                                      stage.getCommentaires() != null ? "Motif : " + stage.getCommentaires() : "");
+                break;
+
+            default:
+                titre = "📋 Mise à jour de votre stage";
+                message = String.format("Votre stage \"%s\" chez %s a été mis à jour.",
+                                      stage.getOffreStage().getTitre(),
+                                      stage.getOffreStage().getEntreprise());
+        }
+
+        Notification notification = new Notification(
+            stage.getStagiaire(),
+            stage.getCandidature(),
+            titre,
+            message,
+            TypeNotification.CANDIDATURE_ACCEPTEE // Utiliser un type existant
+        );
+
+        notificationRepository.save(notification);
+        logger.info("Notification de stage ({}) créée pour l'utilisateur {}",
+                   typeNotification, stage.getStagiaire().getUsername());
+    }
+
     // Récupérer les notifications d'un utilisateur
     public List<Notification> getNotificationsUtilisateur(String emailOrUsername) {
         User user = userRepository.findByEmail(emailOrUsername)

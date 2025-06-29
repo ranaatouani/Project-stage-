@@ -59,6 +59,13 @@ const routes = [
   },
   {
     type: "collapse",
+    name: "Gestion des Stages",
+    key: "stages",
+    icon: <span className="material-icons" style={{ fontSize: 20 }}>school</span>,
+    route: "/admin/stages",
+  },
+  {
+    type: "collapse",
     name: "Tables",
     key: "tables",
     icon: <span className="material-icons" style={{ fontSize: 20 }}>table_view</span>,

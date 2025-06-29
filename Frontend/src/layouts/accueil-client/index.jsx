@@ -14,6 +14,10 @@ import Alert from "@mui/material/Alert";
 import CircularProgress from "@mui/material/CircularProgress";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
+import Avatar from "@mui/material/Avatar";
+import Paper from "@mui/material/Paper";
+import Divider from "@mui/material/Divider";
+import LinearProgress from "@mui/material/LinearProgress";
 
 // @mui icons
 import SearchIcon from "@mui/icons-material/Search";
@@ -21,6 +25,11 @@ import LocationOnIcon from "@mui/icons-material/LocationOn";
 import BusinessIcon from "@mui/icons-material/Business";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import WorkIcon from "@mui/icons-material/Work";
+import SchoolIcon from "@mui/icons-material/School";
+import TrendingUpIcon from "@mui/icons-material/TrendingUp";
+import AssignmentIcon from "@mui/icons-material/Assignment";
+import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
+import NotificationsIcon from "@mui/icons-material/Notifications";
 
 // Material Dashboard 2 React components
 import MDBox from "components/MDBox";
@@ -41,6 +50,7 @@ import OffreDetailsModal from "components/OffreStage/OffreDetailsModal";
 import CandidatureModal from "components/OffreStage/CandidatureModal";
 import MesCandidatures from "components/Candidatures/MesCandidatures";
 import CalendrierEntretiens from "components/Entretien/CalendrierEntretiens";
+import MesStages from "components/Stage/MesStages";
 
 function AccueilClient() {
   const navigate = useNavigate();
@@ -136,7 +146,7 @@ function AccueilClient() {
     <DashboardLayout>
       <DashboardNavbar />
       <MDBox py={3}>
-        {/* En-tête de bienvenue personnalisé */}
+        {/* En-tête de bienvenue simple */}
         <MDBox mb={4}>
           <MDTypography variant="h4" fontWeight="medium" gutterBottom>
             Bienvenue dans votre espace personnel
@@ -152,6 +162,7 @@ function AccueilClient() {
             <Tab label="Offres disponibles" />
             <Tab label="Mes candidatures" />
             <Tab label="Mes entretiens" />
+            <Tab label="Mes stages" />
           </Tabs>
         </MDBox>
 
@@ -337,6 +348,10 @@ function AccueilClient() {
 
         {currentTab === 2 && (
           <CalendrierEntretiens />
+        )}
+
+        {currentTab === 3 && (
+          <MesStages />
         )}
 
         {/* Modals */}

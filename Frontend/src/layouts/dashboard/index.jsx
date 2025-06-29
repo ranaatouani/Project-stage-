@@ -15,7 +15,20 @@ Coded by www.creative-tim.com
 
 // @mui material components
 import Grid from "@mui/material/Grid";
-import { Card, CardContent, Button, Typography, Box, Alert, CircularProgress } from "@mui/material";
+import {
+  Card,
+  CardContent,
+  Button,
+  Typography,
+  Box,
+  Alert,
+  CircularProgress,
+  Avatar,
+  Chip,
+  LinearProgress,
+  Paper,
+  Divider
+} from "@mui/material";
 import {
   Work as WorkIcon,
   People as PeopleIcon,
@@ -23,7 +36,13 @@ import {
   Visibility as VisibilityIcon,
   Edit as EditIcon,
   TrendingUp as TrendingUpIcon,
-  Business as BusinessIcon
+  Business as BusinessIcon,
+  School as SchoolIcon,
+  Timeline as TimelineIcon,
+  Analytics as AnalyticsIcon,
+  Notifications as NotificationsIcon,
+  CheckCircle as CheckCircleIcon,
+  Schedule as ScheduleIcon
 } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
@@ -119,6 +138,8 @@ function Dashboard() {
     <DashboardLayout>
       <DashboardNavbar />
       <MDBox py={3}>
+
+
         {/* Statistiques principales */}
         <Grid container spacing={3}>
           <Grid item xs={12} md={6} lg={3}>

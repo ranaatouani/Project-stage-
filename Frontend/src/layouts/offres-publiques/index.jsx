@@ -33,7 +33,14 @@ import {
   Phone as PhoneIcon,
   LinkedIn as LinkedInIcon,
   Twitter as TwitterIcon,
-  Facebook as FacebookIcon
+  Facebook as FacebookIcon,
+  Assignment as AssignmentIcon,
+  CheckCircle as CheckCircleIcon,
+  Timeline as TimelineIcon,
+  Login as LoginIcon,
+  PersonAdd as PersonAddIcon,
+  Star as StarIcon,
+  Rocket as RocketIcon
 } from '@mui/icons-material';
 
 import MDBox from 'components/MDBox';
@@ -135,26 +142,71 @@ function OffresPubliques() {
       {/* Navigation Header */}
       <PublicNavbar />
 
-      {/* Hero Section */}
+      {/* Hero Section Amélioré */}
       <Box
         sx={{
-          background: 'linear-gradient(135deg, #1976d2 0%, #42a5f5 100%)',
+          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
           color: 'white',
-          py: 8,
-          textAlign: 'center',
+          py: { xs: 8, md: 12 },
+          position: 'relative',
+          overflow: 'hidden',
           width: '100%'
         }}
       >
-        <Box sx={{ px: 4 }}>
-          <Typography variant="h2" component="h1" gutterBottom fontWeight="bold">
-            Trouvez Votre Stage Idéal
-          </Typography>
-          <Typography variant="h5" paragraph sx={{ mb: 4, opacity: 0.9 }}>
-            Découvrez des opportunités de stage exceptionnelles et lancez votre carrière professionnelle
-          </Typography>
+        {/* Image de fond dynamique */}
+        <Box
+          sx={{
+            position: 'absolute',
+            top: 0,
+            right: 0,
+            width: '50%',
+            height: '100%',
+            backgroundImage: 'url(https://images.unsplash.com/photo-1521737604893-d14cc237f11d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80)',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            opacity: 0.2,
+            display: { xs: 'none', md: 'block' }
+          }}
+        />
+
+        <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1 }}>
+          <Grid container spacing={4} alignItems="center">
+            <Grid item xs={12} md={8}>
+              <Box textAlign={{ xs: 'center', md: 'left' }}>
+                <Typography variant="h2" component="h1" gutterBottom fontWeight="bold" sx={{ fontSize: { xs: '2.5rem', md: '3.5rem' } }}>
+                  Trouvez Votre Stage Idéal
+                </Typography>
+                <Typography variant="h5" paragraph sx={{ mb: 4, opacity: 0.9, fontSize: { xs: '1.2rem', md: '1.5rem' } }}>
+                  Découvrez des opportunités de stage exceptionnelles et lancez votre carrière professionnelle
+                </Typography>
+
+                {/* Statistiques rapides */}
+                <Box display="flex" gap={3} mb={4} justifyContent={{ xs: 'center', md: 'flex-start' }} flexWrap="wrap">
+                  <Box display="flex" alignItems="center" gap={1}>
+                    <WorkIcon />
+                    <Typography variant="body1" fontWeight="bold">
+                      {filteredOffres.length}+ Offres
+                    </Typography>
+                  </Box>
+                  <Box display="flex" alignItems="center" gap={1}>
+                    <BusinessIcon />
+                    <Typography variant="body1" fontWeight="bold">
+                      200+ Entreprises
+                    </Typography>
+                  </Box>
+                  <Box display="flex" alignItems="center" gap={1}>
+                    <TrendingUpIcon />
+                    <Typography variant="body1" fontWeight="bold">
+                      95% Satisfaction
+                    </Typography>
+                  </Box>
+                </Box>
+              </Box>
+            </Grid>
+          </Grid>
 
           {/* Barre de recherche hero */}
-          <Box sx={{ maxWidth: 600, mx: 'auto', mb: 4 }}>
+          <Box sx={{ maxWidth: 600, mx: 'auto', mb: 4, textAlign: 'center' }}>
             <TextField
               fullWidth
               placeholder="Rechercher par titre, localisation ou entreprise..."
@@ -228,18 +280,20 @@ function OffresPubliques() {
               </Box>
             </Grid>
           </Grid>
-        </Box>
+        </Container>
       </Box>
 
-      {/* Section À propos */}
-      <Box sx={{ py: 8, width: '100%', bgcolor: '#f8faff' }}>
-        <Box sx={{ px: 4 }}>
-        <Typography variant="h3" component="h2" textAlign="center" gutterBottom fontWeight="bold">
-          Pourquoi Choisir StageConnect ?
-        </Typography>
-        <Typography variant="h6" textAlign="center" color="text.secondary" paragraph sx={{ mb: 6 }}>
-          Notre plateforme connecte les étudiants talentueux avec les meilleures opportunités de stage
-        </Typography>
+      {/* Section Fonctionnalités Améliorée */}
+      <Box sx={{ py: 8, width: '100%', bgcolor: 'white' }}>
+        <Container maxWidth="lg">
+          <Box textAlign="center" mb={6}>
+            <Typography variant="h3" component="h2" gutterBottom fontWeight="bold" color="primary">
+              Pourquoi Choisir StageConnect ?
+            </Typography>
+            <Typography variant="h6" sx={{ mb: 4, color: 'text.secondary', maxWidth: 600, mx: 'auto' }}>
+              Notre plateforme connecte les étudiants talentueux avec les meilleures opportunités de stage
+            </Typography>
+          </Box>
 
         <Grid container spacing={4} justifyContent="center" alignItems="stretch">
           <Grid item xs={12} sm={6} md={4} display="flex">
@@ -314,18 +368,45 @@ function OffresPubliques() {
             </Card>
           </Grid>
         </Grid>
-        </Box>
+        </Container>
       </Box>
 
-      {/* Section des Offres */}
-      <Box sx={{ bgcolor: 'white', py: 8, width: '100%' }}>
-        <Box sx={{ px: 4 }}>
-          <Typography variant="h3" component="h2" textAlign="center" gutterBottom fontWeight="bold">
-            Offres de Stage Disponibles
-          </Typography>
-          <Typography variant="h6" textAlign="center" color="text.secondary" paragraph sx={{ mb: 6 }}>
-            Découvrez les opportunités qui vous attendent
-          </Typography>
+      {/* Section des Offres Améliorée */}
+      <Box sx={{ bgcolor: '#f8f9fa', py: 8, width: '100%' }}>
+        <Container maxWidth="lg">
+          <Box textAlign="center" mb={6}>
+            <Typography variant="h3" component="h2" gutterBottom fontWeight="bold" color="primary">
+              Offres de Stage Disponibles
+            </Typography>
+            <Typography variant="h6" sx={{ color: 'text.secondary', maxWidth: 600, mx: 'auto', mb: 4 }}>
+              Découvrez nos {filteredOffres.length} opportunités qui vous attendent
+            </Typography>
+
+            {/* Filtres rapides */}
+            <Box display="flex" gap={2} justifyContent="center" flexWrap="wrap" mb={4}>
+              <Chip
+                label="Toutes les offres"
+                color="primary"
+                variant="filled"
+                sx={{ fontSize: '0.9rem', px: 2 }}
+              />
+              <Chip
+                label="Informatique"
+                variant="outlined"
+                sx={{ fontSize: '0.9rem', px: 2 }}
+              />
+              <Chip
+                label="Marketing"
+                variant="outlined"
+                sx={{ fontSize: '0.9rem', px: 2 }}
+              />
+              <Chip
+                label="Finance"
+                variant="outlined"
+                sx={{ fontSize: '0.9rem', px: 2 }}
+              />
+            </Box>
+          </Box>
 
           {/* Messages d'erreur */}
           {error && (
@@ -457,18 +538,20 @@ function OffresPubliques() {
             onClose={handleDetailsClose}
             offre={selectedOffre}
           />
-        </Box>
+        </Container>
       </Box>
 
-      {/* Section Témoignages */}
+      {/* Section Témoignages Améliorée */}
       <Box sx={{ bgcolor: '#e3f2fd', py: 8, width: '100%' }}>
-        <Box sx={{ px: 4 }}>
-          <Typography variant="h3" component="h2" textAlign="center" gutterBottom fontWeight="bold">
-            Ce que disent nos étudiants
-          </Typography>
-          <Typography variant="h6" textAlign="center" color="text.secondary" paragraph sx={{ mb: 6 }}>
-            Découvrez les expériences de ceux qui ont trouvé leur stage grâce à StageConnect
-          </Typography>
+        <Container maxWidth="lg">
+          <Box textAlign="center" mb={6}>
+            <Typography variant="h3" component="h2" gutterBottom fontWeight="bold" color="primary">
+              Ce que disent nos étudiants
+            </Typography>
+            <Typography variant="h6" sx={{ color: 'text.secondary', maxWidth: 600, mx: 'auto' }}>
+              Découvrez les expériences de ceux qui ont trouvé leur stage grâce à StageConnect
+            </Typography>
+          </Box>
 
           <Grid container spacing={4}>
             <Grid item xs={12} md={4}>
@@ -519,12 +602,21 @@ function OffresPubliques() {
               </Card>
             </Grid>
           </Grid>
-        </Box>
+        </Container>
       </Box>
 
-      {/* Footer */}
-      <Box component="footer" sx={{ bgcolor: '#1565c0', color: 'white', py: 6, mt: 'auto', width: '100%' }}>
-        <Box sx={{ px: 4 }}>
+      {/* Footer avec couleurs modernes */}
+      <Box
+        component="footer"
+        sx={{
+          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          color: 'white',
+          py: 6,
+          mt: 'auto',
+          width: '100%'
+        }}
+      >
+        <Container maxWidth="lg">
           <Grid container spacing={4}>
             {/* À propos */}
             <Grid item xs={12} md={4}>
@@ -557,19 +649,79 @@ function OffresPubliques() {
                 Liens Rapides
               </Typography>
               <Box display="flex" flexDirection="column" gap={1}>
-                <Link href="#" color="inherit" underline="hover">
+                <Link
+                  href="#"
+                  sx={{
+                    color: 'rgba(255,255,255,0.9)',
+                    textDecoration: 'none',
+                    '&:hover': {
+                      color: 'white',
+                      textDecoration: 'underline',
+                      transform: 'translateX(5px)',
+                      transition: 'all 0.3s ease'
+                    }
+                  }}
+                >
                   Accueil
                 </Link>
-                <Link href="#" color="inherit" underline="hover">
+                <Link
+                  href="#"
+                  sx={{
+                    color: 'rgba(255,255,255,0.9)',
+                    textDecoration: 'none',
+                    '&:hover': {
+                      color: 'white',
+                      textDecoration: 'underline',
+                      transform: 'translateX(5px)',
+                      transition: 'all 0.3s ease'
+                    }
+                  }}
+                >
                   Offres de Stage
                 </Link>
-                <Link href="#" color="inherit" underline="hover">
+                <Link
+                  href="#"
+                  sx={{
+                    color: 'rgba(255,255,255,0.9)',
+                    textDecoration: 'none',
+                    '&:hover': {
+                      color: 'white',
+                      textDecoration: 'underline',
+                      transform: 'translateX(5px)',
+                      transition: 'all 0.3s ease'
+                    }
+                  }}
+                >
                   À propos de nous
                 </Link>
-                <Link href="#" color="inherit" underline="hover">
+                <Link
+                  href="#"
+                  sx={{
+                    color: 'rgba(255,255,255,0.9)',
+                    textDecoration: 'none',
+                    '&:hover': {
+                      color: 'white',
+                      textDecoration: 'underline',
+                      transform: 'translateX(5px)',
+                      transition: 'all 0.3s ease'
+                    }
+                  }}
+                >
                   Comment ça marche
                 </Link>
-                <Link href="/auth/sign-in" color="inherit" underline="hover">
+                <Link
+                  href="/auth/sign-in"
+                  sx={{
+                    color: 'rgba(255,255,255,0.9)',
+                    textDecoration: 'none',
+                    '&:hover': {
+                      color: 'white',
+                      textDecoration: 'underline',
+                      transform: 'translateX(5px)',
+                      transition: 'all 0.3s ease'
+                    }
+                  }}
+                >
                   Espace Admin
                 </Link>
               </Box>
@@ -604,20 +756,42 @@ function OffresPubliques() {
             </Grid>
           </Grid>
 
-          <Divider sx={{ my: 4, bgcolor: 'rgba(255,255,255,0.2)' }} />
+          <Divider sx={{ my: 4, bgcolor: 'rgba(255,255,255,0.3)', height: '1px' }} />
 
           <Box textAlign="center">
-            <Typography variant="body2" color="rgba(255,255,255,0.7)">
+            <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.8)' }}>
               © 2024 StageConnect. Tous droits réservés. |
-              <Link href="#" color="inherit" underline="hover" sx={{ ml: 1 }}>
+              <Link
+                href="#"
+                sx={{
+                  ml: 1,
+                  color: 'rgba(255,255,255,0.9)',
+                  textDecoration: 'none',
+                  '&:hover': {
+                    color: 'white',
+                    textDecoration: 'underline'
+                  }
+                }}
+              >
                 Politique de confidentialité
               </Link> |
-              <Link href="#" color="inherit" underline="hover" sx={{ ml: 1 }}>
+              <Link
+                href="#"
+                sx={{
+                  ml: 1,
+                  color: 'rgba(255,255,255,0.9)',
+                  textDecoration: 'none',
+                  '&:hover': {
+                    color: 'white',
+                    textDecoration: 'underline'
+                  }
+                }}
+              >
                 Conditions d'utilisation
               </Link>
             </Typography>
           </Box>
-        </Box>
+        </Container>
       </Box>
     </Box>
   );
