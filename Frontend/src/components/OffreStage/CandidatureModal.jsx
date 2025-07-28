@@ -25,6 +25,9 @@ import MDButton from 'components/MDButton';
 import MDTypography from 'components/MDTypography';
 import MDInput from 'components/MDInput';
 
+// Services
+import authService from 'services/authService';
+
 function CandidatureModal({ open, onClose, offre, onSubmit }) {
   const [formData, setFormData] = useState({
     nom: '',
@@ -37,6 +40,50 @@ function CandidatureModal({ open, onClose, offre, onSubmit }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [userInfoLoaded, setUserInfoLoaded] = useState(false);
+
+  // Charger les informations de l'utilisateur connecté quand le modal s'ouvre
+  React.useEffect(() => {
+    const loadUserInfo = async () => {
+      if (open && !userInfoLoaded) {
+        try {
+          const userInfo = await authService.getCurrentUserInfo();
+          console.log('Informations utilisateur chargées:', userInfo);
+
+          setFormData(prev => ({
+            ...prev,
+            nom: userInfo.lastName || '',
+            prenom: userInfo.firstName || '',
+            email: userInfo.email || ''
+          }));
+
+          setUserInfoLoaded(true);
+        } catch (error) {
+          console.error('Erreur lors du chargement des informations utilisateur:', error);
+          // En cas d'erreur, on continue avec les champs vides
+        }
+      }
+    };
+
+    loadUserInfo();
+  }, [open, userInfoLoaded]);
+
+  // Réinitialiser l'état quand le modal se ferme
+  React.useEffect(() => {
+    if (!open) {
+      setUserInfoLoaded(false);
+      setFormData({
+        nom: '',
+        prenom: '',
+        email: '',
+        telephone: '',
+        motivation: ''
+      });
+      setCvFile(null);
+      setError('');
+      setSuccess('');
+    }
+  }, [open]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -109,15 +156,13 @@ function CandidatureModal({ open, onClose, offre, onSubmit }) {
       
       setSuccess('Candidature soumise avec succès !');
       
-      // Réinitialiser le formulaire après 2 secondes
+      // Réinitialiser seulement les champs non personnels après 2 secondes
       setTimeout(() => {
-        setFormData({
-          nom: '',
-          prenom: '',
-          email: '',
+        setFormData(prev => ({
+          ...prev,
           telephone: '',
           motivation: ''
-        });
+        }));
         setCvFile(null);
         setSuccess('');
         onClose();
@@ -171,6 +216,12 @@ function CandidatureModal({ open, onClose, offre, onSubmit }) {
           </Alert>
         )}
 
+        {userInfoLoaded && (
+          <Alert severity="info" sx={{ mb: 2 }}>
+            ✅ Vos informations personnelles ont été automatiquement pré-remplies depuis votre profil.
+          </Alert>
+        )}
+
         <Box component="form" onSubmit={handleSubmit}>
           <Grid container spacing={3}>
             {/* Informations personnelles */}
@@ -183,22 +234,34 @@ function CandidatureModal({ open, onClose, offre, onSubmit }) {
             <Grid item xs={12} sm={6}>
               <MDInput
                 fullWidth
-                label="Nom *"
+                label={userInfoLoaded ? "Nom * (pré-rempli)" : "Nom *"}
                 name="nom"
                 value={formData.nom}
                 onChange={handleInputChange}
                 required
+                sx={userInfoLoaded && formData.nom ? {
+                  '& .MuiOutlinedInput-root': {
+                    backgroundColor: 'rgba(76, 175, 80, 0.1)',
+                    '& fieldset': { borderColor: 'success.main' }
+                  }
+                } : {}}
               />
             </Grid>
 
             <Grid item xs={12} sm={6}>
               <MDInput
                 fullWidth
-                label="Prénom *"
+                label={userInfoLoaded ? "Prénom * (pré-rempli)" : "Prénom *"}
                 name="prenom"
                 value={formData.prenom}
                 onChange={handleInputChange}
                 required
+                sx={userInfoLoaded && formData.prenom ? {
+                  '& .MuiOutlinedInput-root': {
+                    backgroundColor: 'rgba(76, 175, 80, 0.1)',
+                    '& fieldset': { borderColor: 'success.main' }
+                  }
+                } : {}}
               />
             </Grid>
 
@@ -206,11 +269,17 @@ function CandidatureModal({ open, onClose, offre, onSubmit }) {
               <MDInput
                 fullWidth
                 type="email"
-                label="Email *"
+                label={userInfoLoaded ? "Email * (pré-rempli)" : "Email *"}
                 name="email"
                 value={formData.email}
                 onChange={handleInputChange}
                 required
+                sx={userInfoLoaded && formData.email ? {
+                  '& .MuiOutlinedInput-root': {
+                    backgroundColor: 'rgba(76, 175, 80, 0.1)',
+                    '& fieldset': { borderColor: 'success.main' }
+                  }
+                } : {}}
               />
             </Grid>
 

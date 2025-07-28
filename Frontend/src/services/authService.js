@@ -176,6 +176,33 @@ class AuthService {
     const currentTime = Date.now() / 1000;
     return decoded.exp < currentTime;
   }
+
+  // Récupérer les informations de l'utilisateur connecté
+  async getCurrentUserInfo() {
+    try {
+      const token = this.getToken();
+      if (!token) {
+        throw new Error('Aucun token d\'authentification trouvé');
+      }
+
+      const response = await fetch(`${this.baseURL}/me`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Erreur lors de la récupération des informations utilisateur');
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Erreur getCurrentUserInfo:', error);
+      throw error;
+    }
+  }
 }
 
 // Exporter une instance unique (singleton)
