@@ -9,7 +9,8 @@ import {
   Paper,
   Alert,
   CircularProgress,
-  LinearProgress
+  LinearProgress,
+  Button
 } from '@mui/material';
 import {
   Work as WorkIcon,
@@ -19,7 +20,8 @@ import {
   Business as BusinessIcon,
   CalendarToday as CalendarIcon,
   LocationOn as LocationIcon,
-  Schedule as ScheduleIcon
+  Schedule as ScheduleIcon,
+  GetApp as DownloadIcon
 } from '@mui/icons-material';
 
 // Material Dashboard 2 React components
@@ -36,6 +38,7 @@ function MesStages() {
   const [stages, setStages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [downloadingAttestation, setDownloadingAttestation] = useState(null);
 
   useEffect(() => {
     loadStages();
@@ -55,6 +58,18 @@ function MesStages() {
       setError(`Erreur lors du chargement de vos stages: ${err.response?.data?.error || err.message}`);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleTelechargerAttestation = async (stageId) => {
+    try {
+      setDownloadingAttestation(stageId);
+      await stageService.telechargerAttestation(stageId);
+    } catch (error) {
+      console.error('Erreur lors du téléchargement de l\'attestation:', error);
+      setError('Erreur lors du téléchargement de l\'attestation');
+    } finally {
+      setDownloadingAttestation(null);
     }
   };
 
@@ -292,6 +307,26 @@ function MesStages() {
                       <Typography variant="body2" sx={{ mt: 1 }}>
                         {stage.commentaires}
                       </Typography>
+                    </Box>
+                  )}
+
+                  {/* Bouton de téléchargement d'attestation pour les stages terminés */}
+                  {stage.statut === 'TERMINE' && (
+                    <Box mt={2} display="flex" justifyContent="center">
+                      <Button
+                        variant="contained"
+                        color="success"
+                        startIcon={downloadingAttestation === stage.id ? <CircularProgress size={20} /> : <DownloadIcon />}
+                        onClick={() => handleTelechargerAttestation(stage.id)}
+                        disabled={downloadingAttestation === stage.id}
+                        sx={{
+                          borderRadius: 2,
+                          textTransform: 'none',
+                          fontWeight: 'bold'
+                        }}
+                      >
+                        {downloadingAttestation === stage.id ? 'Téléchargement...' : 'Télécharger l\'Attestation'}
+                      </Button>
                     </Box>
                   )}
                 </CardContent>

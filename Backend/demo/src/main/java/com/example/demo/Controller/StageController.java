@@ -1,15 +1,19 @@
 package com.example.demo.Controller;
 
-import com.example.demo.dto.StageDTO;
 import com.example.demo.entity.Stage;
 import com.example.demo.entity.StatutStage;
 import com.example.demo.entity.User;
 import com.example.demo.service.StageService;
+import com.example.demo.service.AttestationService;
 import com.example.demo.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ContentDisposition;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -27,9 +31,12 @@ public class StageController {
     
     @Autowired
     private StageService stageService;
-    
+
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private AttestationService attestationService;
     
     /**
      * Créer un stage à partir d'une candidature acceptée (Admin seulement)
@@ -185,7 +192,9 @@ public class StageController {
             logger.info("Récupération du stage ID: {}", stageId);
 
             Stage stage = stageService.getStageById(stageId)
-                .orElseThrow(() -> new RuntimeException("Stage non trouvé"));
+                .orElseThrow(() -> {
+                    return new RuntimeException("Stage non trouvé");
+                });
 
             // Vérifier les permissions
             String email = authentication.getName(); // L'authentification utilise l'email
@@ -217,6 +226,68 @@ public class StageController {
         } catch (Exception e) {
             logger.error("Erreur lors de la suppression du stage", e);
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    /**
+     * Télécharger l'attestation de stage (Client seulement pour ses propres stages terminés)
+     */
+    @GetMapping("/{stageId}/attestation")
+    public ResponseEntity<byte[]> telechargerAttestation(@PathVariable Long stageId, Authentication authentication) {
+        try {
+            logger.info("Demande de téléchargement d'attestation pour le stage ID: {}", stageId);
+
+            // Récupérer l'utilisateur connecté
+            String email = authentication.getName(); // L'authentification utilise l'email
+            User user = userService.findByEmailOptional(email)
+                .orElseThrow(() -> {
+                    return new RuntimeException("Utilisateur non trouvé");
+                });
+
+            // Récupérer le stage
+            Stage stage = stageService.getStageById(stageId)
+                .orElseThrow(() -> {
+                    return new RuntimeException("Stage non trouvé");
+                });
+
+            // Vérifier que le stage appartient à l'utilisateur connecté
+            if (!stage.getStagiaire().getId().equals(user.getId())) {
+                logger.warn("Tentative d'accès non autorisé à l'attestation du stage {} par l'utilisateur {}",
+                           stageId, email);
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body("Accès non autorisé à cette attestation".getBytes());
+            }
+
+            // Vérifier que le stage est terminé
+            if (stage.getStatut() != StatutStage.TERMINE) {
+                logger.warn("Tentative de téléchargement d'attestation pour un stage non terminé: {}", stageId);
+                return ResponseEntity.badRequest()
+                    .body("L'attestation n'est disponible que pour les stages terminés".getBytes());
+            }
+
+            // Générer l'attestation
+            byte[] attestationPdf = attestationService.genererAttestationStage(stage);
+
+            // Nom du fichier
+            String filename = String.format("Attestation_Stage_%s_%s.pdf",
+                stage.getStagiaire().getLastName(),
+                stage.getId());
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_PDF);
+            headers.setContentDisposition(ContentDisposition.builder("attachment")
+                .filename(filename)
+                .build());
+
+            logger.info("Attestation générée et envoyée pour le stage ID: {}", stageId);
+            return ResponseEntity.ok()
+                .headers(headers)
+                .body(attestationPdf);
+
+        } catch (Exception e) {
+            logger.error("Erreur lors du téléchargement de l'attestation pour le stage {}: {}", stageId, e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(("Erreur lors de la génération de l'attestation: " + e.getMessage()).getBytes());
         }
     }
 }

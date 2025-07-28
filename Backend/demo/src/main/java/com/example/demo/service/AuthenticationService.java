@@ -103,7 +103,9 @@ public class AuthenticationService {
         try {
             // Vérifier d'abord si l'utilisateur existe
             User user = repository.findByEmail(request.getEmail())
-                    .orElseThrow(() -> new RuntimeException("User not found"));
+                    .orElseThrow(() -> {
+                        return new RuntimeException("User not found");
+                    });
 
             System.out.println("Utilisateur trouvé: " + user.getEmail());
             System.out.println("Compte activé: " + user.isEnabled());
@@ -164,7 +166,9 @@ public class AuthenticationService {
 
         String token = authHeader.substring(7);
         String email = jwtService.extractUsername(token);
-        User user = repository.findByEmail(email).orElseThrow(() -> new RuntimeException("No user found"));
+        User user = repository.findByEmail(email).orElseThrow(() -> {
+            return new RuntimeException("No user found");
+        });
 
         if (jwtService.isValidRefreshToken(token, user)) {
             String accessToken = jwtService.generateAccessToken(user);
@@ -220,7 +224,9 @@ public class AuthenticationService {
 
     public Map<String, Object> getUserInfo(String email) {
         User user = repository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
+                .orElseThrow(() -> {
+                    return new RuntimeException("Utilisateur non trouvé");
+                });
 
         Map<String, Object> userInfo = new HashMap<>();
         userInfo.put("email", user.getEmail());
@@ -236,7 +242,9 @@ public class AuthenticationService {
     }
 
     public Map<String, Object> getCurrentUserInfo(String email) {
-        User user = repository.findByEmail(email).orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
+        User user = repository.findByEmail(email).orElseThrow(() -> {
+            return new RuntimeException("Utilisateur non trouvé");
+        });
         Map<String, Object> userInfo = new HashMap<>();
         userInfo.put("id", user.getId());
         userInfo.put("email", user.getEmail());
@@ -249,7 +257,9 @@ public class AuthenticationService {
     }
 
     public Map<String, Object> updateUserProfile(String email, Map<String, String> profileData) {
-        User user = repository.findByEmail(email).orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
+        User user = repository.findByEmail(email).orElseThrow(() -> {
+            return new RuntimeException("Utilisateur non trouvé");
+        });
 
         // Mise à jour des champs si fournis
         if (profileData.containsKey("firstName") && profileData.get("firstName") != null) {

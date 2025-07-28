@@ -15,12 +15,16 @@ public class UserService {
     
     public User findByUsername(String username) {
         return userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé: " + username));
+                .orElseThrow(() -> {
+                    return new RuntimeException("Utilisateur non trouvé: " + username);
+                });
     }
-    
+
     public User findByEmail(String email) {
         return userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé: " + email));
+                .orElseThrow(() -> {
+                    return new RuntimeException("Utilisateur non trouvé: " + email);
+                });
     }
     
     public Optional<User> findByUsernameOptional(String username) {
@@ -33,6 +37,8 @@ public class UserService {
     
     public User findById(Long id) {
         return userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé avec l'ID: " + id));
+                .orElseThrow(() -> {
+                    return new RuntimeException("Utilisateur non trouvé avec l'ID: " + id);
+                });
     }
 }

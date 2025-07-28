@@ -93,6 +93,36 @@ export const stageService = {
     return response.data;
   },
 
+  // Télécharger l'attestation de stage (client)
+  async telechargerAttestation(stageId) {
+    const response = await apiClient.get(`/stages/${stageId}/attestation`, {
+      responseType: 'blob'
+    });
+
+    // Créer un lien de téléchargement
+    const url = window.URL.createObjectURL(new Blob([response.data]));
+    const link = document.createElement('a');
+    link.href = url;
+
+    // Extraire le nom du fichier depuis les headers
+    const contentDisposition = response.headers['content-disposition'];
+    let filename = 'Attestation_Stage.pdf';
+    if (contentDisposition) {
+      const filenameMatch = contentDisposition.match(/filename="(.+)"/);
+      if (filenameMatch) {
+        filename = filenameMatch[1];
+      }
+    }
+
+    link.setAttribute('download', filename);
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.URL.revokeObjectURL(url);
+
+    return response;
+  },
+
   // Récupérer un stage par ID
   async getStageById(stageId) {
     const response = await apiClient.get(`/stages/${stageId}`);
