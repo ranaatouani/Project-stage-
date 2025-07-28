@@ -3,6 +3,8 @@ package com.example.demo.Controller;
 import com.example.demo.entity.Candidature;
 import com.example.demo.entity.StatutCandidature;
 import com.example.demo.service.CandidatureService;
+import com.example.demo.dto.AccepterCandidatureAvecProjetDTO;
+import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -144,6 +146,29 @@ public class CandidatureController {
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             logger.error("Erreur lors du changement de statut: {}", e.getMessage());
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", false);
+            response.put("message", e.getMessage());
+            return ResponseEntity.badRequest().body(response);
+        }
+    }
+
+    @PostMapping("/accepter-avec-projet")
+    public ResponseEntity<Map<String, Object>> accepterCandidatureAvecProjet(
+            @Valid @RequestBody AccepterCandidatureAvecProjetDTO dto) {
+        try {
+            logger.info("Acceptation de la candidature {} avec assignation de projet", dto.getCandidatureId());
+
+            Candidature candidature = candidatureService.accepterCandidatureAvecProjet(dto);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("message", "Candidature acceptée et projet assigné avec succès");
+            response.put("candidature", candidature);
+
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            logger.error("Erreur lors de l'acceptation avec projet: {}", e.getMessage());
             Map<String, Object> response = new HashMap<>();
             response.put("success", false);
             response.put("message", e.getMessage());

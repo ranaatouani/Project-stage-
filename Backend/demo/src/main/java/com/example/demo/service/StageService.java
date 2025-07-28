@@ -4,6 +4,7 @@ import com.example.demo.dto.StageDTO;
 import com.example.demo.entity.*;
 import com.example.demo.repository.StageRepository;
 import com.example.demo.repository.CandidatureRepository;
+import com.example.demo.repository.ProjetStageRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +27,10 @@ public class StageService {
     
     @Autowired
     private CandidatureRepository candidatureRepository;
-    
+
+    @Autowired
+    private ProjetStageRepository projetStageRepository;
+
     @Autowired
     private NotificationService notificationService;
     
@@ -70,12 +74,48 @@ public class StageService {
         
         return savedStage;
     }
-    
+
     /**
-     * Récupérer tous les stages (Admin) - Version optimisée
+     * Créer un stage à partir d'une candidature acceptée avec projet assigné
      */
-    public List<StageDTO> getAllStagesOptimized() {
-        return stageRepository.findAllStagesOptimized();
+    public Stage creerStageDepuisCandidatureAvecProjet(Long candidatureId, Long projetId,
+                                                       LocalDate dateDebut, LocalDate dateFin,
+                                                       String commentaires) {
+        logger.info("Création d'un stage pour la candidature {} avec projet {}", candidatureId, projetId);
+
+        Candidature candidature = candidatureRepository.findById(candidatureId)
+            .orElseThrow(() -> new RuntimeException("Candidature non trouvée"));
+
+        ProjetStage projet = projetStageRepository.findById(projetId)
+            .orElseThrow(() -> new RuntimeException("Projet non trouvé"));
+
+        // Vérifier qu'un stage n'existe pas déjà pour cette candidature
+        Optional<Stage> stageExistant = stageRepository.findByCandidature(candidature);
+        if (stageExistant.isPresent()) {
+            logger.warn("Un stage existe déjà pour la candidature {}", candidatureId);
+            return stageExistant.get();
+        }
+
+        // Créer le stage
+        Stage stage = new Stage(candidature, candidature.getCandidat(), candidature.getOffreStage());
+        stage.setProjetStage(projet);
+        stage.setDateDebut(dateDebut);
+        stage.setDateFin(dateFin);
+        stage.setCommentaires(commentaires);
+        stage.setStatut(StatutStage.EN_COURS);
+
+        Stage savedStage = stageRepository.save(stage);
+        logger.info("Stage créé avec succès: {}", savedStage.getId());
+
+        // Envoyer une notification au stagiaire
+        try {
+            notificationService.creerNotificationNouveauStage(savedStage);
+        } catch (Exception e) {
+            logger.error("Erreur lors de l'envoi de la notification de stage", e);
+            // Ne pas faire échouer la création du stage si la notification échoue
+        }
+
+        return savedStage;
     }
 
     /**
@@ -84,26 +124,12 @@ public class StageService {
     public List<Stage> getAllStages() {
         return stageRepository.findAllByOrderByDateCreationDesc();
     }
-    
-    /**
-     * Récupérer les stages d'un stagiaire - Version optimisée
-     */
-    public List<StageDTO> getStagesByStagiaireOptimized(User stagiaire) {
-        return stageRepository.findStagesByStagiaireOptimized(stagiaire);
-    }
 
     /**
      * Récupérer les stages d'un stagiaire - Version complète
      */
     public List<Stage> getStagesByStagiaire(User stagiaire) {
         return stageRepository.findByStagiaireOrderByDateCreationDesc(stagiaire);
-    }
-    
-    /**
-     * Récupérer un stage par ID - Version optimisée
-     */
-    public Optional<StageDTO> getStageByIdOptimized(Long stageId) {
-        return stageRepository.findStageByIdOptimized(stageId);
     }
 
     /**
@@ -140,21 +166,12 @@ public class StageService {
         
         // Envoyer une notification
         try {
-            String typeNotification;
-            switch (nouveauStatut) {
-                case TERMINE:
-                    typeNotification = "STAGE_TERMINE";
-                    break;
-                case ANNULE:
-                    typeNotification = "STAGE_ANNULE";
-                    break;
-                case SUSPENDU:
-                    typeNotification = "STAGE_SUSPENDU";
-                    break;
-                default:
-                    typeNotification = "STAGE_MODIFIE";
-                    break;
-            }
+            String typeNotification = switch (nouveauStatut) {
+                case TERMINE -> "STAGE_TERMINE";
+                case ANNULE -> "STAGE_ANNULE";
+                case SUSPENDU -> "STAGE_SUSPENDU";
+                default -> "STAGE_MODIFIE";
+            };
             notificationService.envoyerNotificationStage(savedStage, typeNotification);
         } catch (Exception e) {
             logger.error("Erreur lors de l'envoi de la notification de changement de statut", e);

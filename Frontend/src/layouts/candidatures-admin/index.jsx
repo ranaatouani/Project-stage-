@@ -49,7 +49,7 @@ import Footer from "examples/Footer";
 import { candidatureService } from "services/candidatureService";
 
 // Components
-import CandidatureDetailsModal from "components/Candidature/CandidatureDetailsModalUltraSimple";
+import CandidatureDetailsModal from "components/Candidature/CandidatureDetailsModalFinal";
 
 function CandidaturesAdmin() {
   const navigate = useNavigate();

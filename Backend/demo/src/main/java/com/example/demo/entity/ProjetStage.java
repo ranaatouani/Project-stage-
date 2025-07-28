@@ -35,6 +35,15 @@ public class ProjetStage {
     @Size(max = 500, message = "Les compétences requises ne peuvent pas dépasser 500 caractères")
     private String competencesRequises;
 
+    @Column(name = "livrables_attendus", columnDefinition = "TEXT")
+    private String livrablesAttendus;
+
+    @Column(name = "date_debut")
+    private java.time.LocalDate dateDebut;
+
+    @Column(name = "date_fin")
+    private java.time.LocalDate dateFin;
+
     // Constructeurs
     public ProjetStage() {}
 
@@ -90,6 +99,30 @@ public class ProjetStage {
 
     public void setCompetencesRequises(String competencesRequises) {
         this.competencesRequises = competencesRequises;
+    }
+
+    public String getLivrablesAttendus() {
+        return livrablesAttendus;
+    }
+
+    public void setLivrablesAttendus(String livrablesAttendus) {
+        this.livrablesAttendus = livrablesAttendus;
+    }
+
+    public java.time.LocalDate getDateDebut() {
+        return dateDebut;
+    }
+
+    public void setDateDebut(java.time.LocalDate dateDebut) {
+        this.dateDebut = dateDebut;
+    }
+
+    public java.time.LocalDate getDateFin() {
+        return dateFin;
+    }
+
+    public void setDateFin(java.time.LocalDate dateFin) {
+        this.dateFin = dateFin;
     }
 
     @Override

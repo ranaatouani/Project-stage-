@@ -226,6 +226,43 @@ public class NotificationService {
                    typeNotification, stage.getStagiaire().getUsername());
     }
 
+    /**
+     * Créer une notification pour un nouveau stage
+     */
+    public void creerNotificationNouveauStage(Stage stage) {
+        if (stage.getStagiaire() == null) {
+            logger.warn("Impossible de créer une notification de nouveau stage : stage sans stagiaire associé");
+            return;
+        }
+
+        String titre = "🎉 Nouveau stage assigné !";
+        String message = String.format("Félicitations ! Un nouveau stage vous a été assigné.\n\n" +
+                                     "📋 Détails du stage :\n" +
+                                     "• Offre : %s\n" +
+                                     "• Entreprise : %s\n" +
+                                     "• Début : %s\n" +
+                                     "• Fin : %s\n" +
+                                     "%s\n" +
+                                     "Consultez votre espace personnel pour plus de détails.",
+                                     stage.getOffreStage().getTitre(),
+                                     stage.getOffreStage().getEntreprise(),
+                                     stage.getDateDebut() != null ? stage.getDateDebut().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy")) : "À définir",
+                                     stage.getDateFin() != null ? stage.getDateFin().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy")) : "À définir",
+                                     stage.getProjetStage() != null ? "• Projet : " + stage.getProjetStage().getTitre() : "");
+
+        Notification notification = new Notification(
+            stage.getStagiaire(),
+            stage.getCandidature(),
+            titre,
+            message,
+            TypeNotification.CANDIDATURE_ACCEPTEE // Utiliser un type existant
+        );
+
+        notificationRepository.save(notification);
+        logger.info("Notification de nouveau stage créée pour l'utilisateur {}",
+                   stage.getStagiaire().getUsername());
+    }
+
     // Récupérer les notifications d'un utilisateur
     public List<Notification> getNotificationsUtilisateur(String emailOrUsername) {
         User user = userRepository.findByEmail(emailOrUsername)

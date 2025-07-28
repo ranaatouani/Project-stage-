@@ -4,9 +4,13 @@ import com.example.demo.entity.Candidature;
 import com.example.demo.entity.OffreStage;
 import com.example.demo.entity.StatutCandidature;
 import com.example.demo.entity.User;
+import com.example.demo.entity.ProjetStage;
+import com.example.demo.entity.Stage;
 import com.example.demo.repository.CandidatureRepository;
 import com.example.demo.repository.OffreStageRepository;
 import com.example.demo.repository.UserRepository;
+import com.example.demo.repository.ProjetStageRepository;
+import com.example.demo.dto.AccepterCandidatureAvecProjetDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -36,6 +40,7 @@ public class CandidatureService {
     private final CandidatureRepository candidatureRepository;
     private final OffreStageRepository offreStageRepository;
     private final UserRepository userRepository;
+    private final ProjetStageRepository projetStageRepository;
 
     @Autowired
     private NotificationService notificationService;
@@ -46,10 +51,12 @@ public class CandidatureService {
 
     public CandidatureService(CandidatureRepository candidatureRepository,
                              OffreStageRepository offreStageRepository,
-                             UserRepository userRepository) {
+                             UserRepository userRepository,
+                             ProjetStageRepository projetStageRepository) {
         this.candidatureRepository = candidatureRepository;
         this.offreStageRepository = offreStageRepository;
         this.userRepository = userRepository;
+        this.projetStageRepository = projetStageRepository;
         
         // Créer le dossier d'upload s'il n'existe pas
         try {
@@ -210,6 +217,65 @@ public class CandidatureService {
                 logger.error("Erreur lors de la création de la notification ou du stage: {}", e.getMessage());
                 // Ne pas faire échouer le changement de statut si la notification/stage échoue
             }
+        }
+
+        return candidature;
+    }
+
+    /**
+     * Accepter une candidature avec assignation d'un projet
+     */
+    @Transactional
+    public Candidature accepterCandidatureAvecProjet(AccepterCandidatureAvecProjetDTO dto) {
+        logger.info("Acceptation de la candidature {} avec assignation de projet", dto.getCandidatureId());
+
+        // Récupérer la candidature
+        Candidature candidature = getCandidatureById(dto.getCandidatureId());
+
+        if (candidature.getStatut() == StatutCandidature.ACCEPTEE) {
+            throw new RuntimeException("Cette candidature a déjà été acceptée");
+        }
+
+        // Créer le projet
+        ProjetStage projet = new ProjetStage();
+        projet.setTitre(dto.getTitreProjet());
+        projet.setDescription(dto.getDescriptionProjet());
+        projet.setTechnologiesUtilisees(dto.getTechnologiesUtilisees());
+        projet.setObjectifs(dto.getObjectifs());
+        projet.setCompetencesRequises(dto.getCompetencesRequises());
+        projet.setLivrablesAttendus(dto.getLivrablesAttendus());
+        projet.setDateDebut(dto.getDateDebut());
+        projet.setDateFin(dto.getDateFin());
+
+        // Sauvegarder le projet
+        projet = projetStageRepository.save(projet);
+        logger.info("Projet créé avec l'ID: {}", projet.getId());
+
+        // Changer le statut de la candidature
+        StatutCandidature ancienStatut = candidature.getStatut();
+        candidature.setStatut(StatutCandidature.ACCEPTEE);
+        candidature = candidatureRepository.save(candidature);
+
+        // Créer une notification pour le changement de statut
+        try {
+            notificationService.creerNotificationChangementStatut(candidature, ancienStatut);
+        } catch (Exception e) {
+            logger.error("Erreur lors de la création de la notification: {}", e.getMessage());
+        }
+
+        // Créer le stage avec le projet assigné
+        try {
+            Stage stage = stageService.creerStageDepuisCandidatureAvecProjet(
+                candidature.getId(),
+                projet.getId(),
+                dto.getDateDebut(),
+                dto.getDateFin(),
+                dto.getCommentaires()
+            );
+            logger.info("Stage créé avec l'ID: {} et projet assigné: {}", stage.getId(), projet.getId());
+        } catch (Exception e) {
+            logger.error("Erreur lors de la création du stage: {}", e.getMessage());
+            throw new RuntimeException("Erreur lors de la création du stage: " + e.getMessage());
         }
 
         return candidature;

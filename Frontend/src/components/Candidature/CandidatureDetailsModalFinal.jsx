@@ -12,7 +12,8 @@ import {
   IconButton,
   Paper,
   Avatar,
-  Alert
+  Alert,
+  TextField
 } from '@mui/material';
 import {
   Close as CloseIcon,
@@ -30,10 +31,15 @@ import {
 import MDBox from 'components/MDBox';
 import MDButton from 'components/MDButton';
 import MDTypography from 'components/MDTypography';
+import AccepterAvecProjetModal from './AccepterAvecProjetModal';
 
 function CandidatureDetailsModalFinal({ open, onClose, candidature, onChangeStatut }) {
+  console.log('🔄 CandidatureDetailsModalFinal rendu - Version corrigée');
+
+  // Tous les hooks d'abord, avant toute condition
   const [loading, setLoading] = useState(false);
   const [showProgrammationForm, setShowProgrammationForm] = useState(false);
+  const [showAccepterAvecProjetModal, setShowAccepterAvecProjetModal] = useState(false);
   const [entretienData, setEntretienData] = useState({
     dateEntretien: '',
     lieu: '',
@@ -43,9 +49,11 @@ function CandidatureDetailsModalFinal({ open, onClose, candidature, onChangeStat
   });
   const [error, setError] = useState('');
 
-  if (!candidature) return null;
+  // Tous les useEffect ensemble
+  React.useEffect(() => {
+    console.log('État showAccepterAvecProjetModal changé:', showAccepterAvecProjetModal);
+  }, [showAccepterAvecProjetModal]);
 
-  // Initialiser la date avec demain à 10h00
   React.useEffect(() => {
     if (showProgrammationForm && !entretienData.dateEntretien) {
       const tomorrow = new Date();
@@ -54,7 +62,10 @@ function CandidatureDetailsModalFinal({ open, onClose, candidature, onChangeStat
       const isoString = tomorrow.toISOString().slice(0, 16);
       setEntretienData(prev => ({ ...prev, dateEntretien: isoString }));
     }
-  }, [showProgrammationForm]);
+  }, [showProgrammationForm, entretienData.dateEntretien]);
+
+  // Condition de retour après tous les hooks
+  if (!candidature) return null;
 
   const formatDate = (dateString) => {
     if (!dateString) return 'Non défini';
@@ -469,15 +480,32 @@ function CandidatureDetailsModalFinal({ open, onClose, candidature, onChangeStat
               <>
                 <MDButton
                   variant="gradient"
-                  color="success"
-                  onClick={() => onChangeStatut('ACCEPTEE')}
+                  color="info"
+                  onClick={() => {
+                    console.log('🎯 BOUTON PRINCIPAL CLIQUÉ - Ouverture du modal de projet pour candidature:', candidature);
+                    console.log('État actuel showAccepterAvecProjetModal:', showAccepterAvecProjetModal);
+                    setShowAccepterAvecProjetModal(true);
+                  }}
+                  sx={{ mr: 1 }}
                 >
-                  Accepter
+                  Accepter avec Projet
+                </MDButton>
+                <MDButton
+                  variant="outlined"
+                  color="success"
+                  onClick={() => {
+                    console.log('⚠️ BOUTON SECONDAIRE CLIQUÉ - Acceptation sans projet');
+                    onChangeStatut('ACCEPTEE');
+                  }}
+                  sx={{ mr: 1 }}
+                >
+                  Accepter sans projet
                 </MDButton>
                 <MDButton
                   variant="gradient"
                   color="error"
                   onClick={() => onChangeStatut('REFUSEE')}
+                  sx={{ mr: 1 }}
                 >
                   Refuser
                 </MDButton>
@@ -522,6 +550,25 @@ function CandidatureDetailsModalFinal({ open, onClose, candidature, onChangeStat
           </>
         )}
       </DialogActions>
+
+      {/* Modal pour accepter avec projet */}
+      {console.log('Rendu du modal AccepterAvecProjetModal avec:', {
+        showAccepterAvecProjetModal,
+        candidatureId: candidature?.id
+      })}
+      <AccepterAvecProjetModal
+        open={showAccepterAvecProjetModal}
+        onClose={() => {
+          console.log('Fermeture du modal AccepterAvecProjetModal');
+          setShowAccepterAvecProjetModal(false);
+        }}
+        candidature={candidature}
+        onSuccess={() => {
+          console.log('Succès du modal AccepterAvecProjetModal');
+          setShowAccepterAvecProjetModal(false);
+          onChangeStatut('ACCEPTEE'); // Rafraîchir la liste
+        }}
+      />
     </Dialog>
   );
 }

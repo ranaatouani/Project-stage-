@@ -29,6 +29,9 @@ import MDTypography from 'components/MDTypography';
 // Services
 import { stageService } from 'services/stageService';
 
+// Components
+import ProjetStageDetails from './ProjetStageDetails';
+
 function MesStages() {
   const [stages, setStages] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -166,12 +169,15 @@ function MesStages() {
         {stages.map((stage) => {
           const progress = calculateProgress(stage.dateDebut, stage.dateFin);
           const daysRemaining = getDaysRemaining(stage.dateFin);
-          
+
           return (
-            <Grid item xs={12} md={6} lg={4} key={stage.id}>
-              <Card 
-                sx={{ 
-                  height: '100%',
+            <Grid item xs={12} key={stage.id}>
+              {/* Détails du projet assigné */}
+              <ProjetStageDetails stage={stage} />
+
+              {/* Informations générales du stage */}
+              <Card
+                sx={{
                   border: stage.statut === 'EN_COURS' ? '2px solid' : '1px solid',
                   borderColor: stage.statut === 'EN_COURS' ? 'info.main' : 'divider'
                 }}
@@ -179,21 +185,27 @@ function MesStages() {
                 <CardContent>
                   {/* En-tête avec statut */}
                   <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+                    <MDTypography variant="h6" fontWeight="bold">
+                      Informations du Stage
+                    </MDTypography>
                     <Chip
                       icon={getStatutIcon(stage.statut)}
                       label={getStatutLabel(stage.statut)}
                       color={getStatutColor(stage.statut)}
                       size="small"
                     />
-                    {stage.statut === 'EN_COURS' && daysRemaining !== null && (
-                      <Typography variant="caption" color="text.secondary">
-                        {daysRemaining > 0 ? `${daysRemaining} jours restants` : 'Terminé'}
-                      </Typography>
-                    )}
                   </Box>
 
-                  {/* Titre du stage */}
-                  <MDTypography variant="h6" fontWeight="bold" gutterBottom>
+                  {stage.statut === 'EN_COURS' && daysRemaining !== null && (
+                    <Box mb={2}>
+                      <Typography variant="body2" color="text.secondary">
+                        {daysRemaining > 0 ? `${daysRemaining} jours restants` : 'Stage terminé'}
+                      </Typography>
+                    </Box>
+                  )}
+
+                  {/* Titre de l'offre */}
+                  <MDTypography variant="h6" fontWeight="medium" gutterBottom color="primary">
                     {stage.offreStage.titre}
                   </MDTypography>
 

@@ -4,6 +4,7 @@ import com.example.demo.dto.StageDTO;
 import com.example.demo.entity.Stage;
 import com.example.demo.entity.StatutStage;
 import com.example.demo.entity.User;
+import com.example.demo.entity.Candidature;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -18,6 +19,9 @@ public interface StageRepository extends JpaRepository<Stage, Long> {
     
     // Trouver un stage par candidature
     Optional<Stage> findByCandidatureId(Long candidatureId);
+
+    // Trouver un stage par candidature (entité)
+    Optional<Stage> findByCandidature(Candidature candidature);
     
     // Trouver tous les stages d'un stagiaire
     List<Stage> findByStagiaireOrderByDateCreationDesc(User stagiaire);

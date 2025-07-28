@@ -49,6 +49,11 @@ public class Stage {
     @Column(name = "rapport_stage")
     private String rapportStage;
 
+    // Relation avec ProjetStage (Many-to-One)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "projet_stage_id")
+    private ProjetStage projetStage;
+
     // Constructeurs
     public Stage() {
         this.dateCreation = LocalDateTime.now();
@@ -158,6 +163,14 @@ public class Stage {
 
     public void setRapportStage(String rapportStage) {
         this.rapportStage = rapportStage;
+    }
+
+    public ProjetStage getProjetStage() {
+        return projetStage;
+    }
+
+    public void setProjetStage(ProjetStage projetStage) {
+        this.projetStage = projetStage;
     }
 
     @Override

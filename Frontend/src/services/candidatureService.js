@@ -84,6 +84,12 @@ export const candidatureService = {
     return response.data;
   },
 
+  // Accepter une candidature avec assignation de projet (admin)
+  async accepterCandidatureAvecProjet(data) {
+    const response = await apiClient.post('/candidatures/accepter-avec-projet', data);
+    return response.data;
+  },
+
   // Supprimer une candidature (admin)
   async supprimerCandidature(candidatureId) {
     const response = await apiClient.delete(`/candidatures/${candidatureId}`);
